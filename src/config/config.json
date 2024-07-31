@@ -1,8 +1,8 @@
 {
   "test": {
     "username": "postgres",
-    "password": "password",
-    "database": "cex",
+    "password": "Link@2022",
+    "database": "cX",
     "host": "127.0.0.1",
     "dialect": "postgres"
   }
