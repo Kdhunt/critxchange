@@ -44,6 +44,7 @@ if (Object.keys(config).length > 0) {
     dialect: process.env.DB_DIALECT || 'postgres',
     logging: false
   });
+
 } else if (env !== 'production') {
   // Fall back to an in-memory SQLite instance for local development
   sequelize = new Sequelize({
@@ -51,6 +52,7 @@ if (Object.keys(config).length > 0) {
     storage: process.env.DB_STORAGE || ':memory:',
     logging: false
   });
+
 } else {
   throw new Error(`No configuration found for environment: ${env}`);
 }
