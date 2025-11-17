@@ -342,135 +342,144 @@
             }, 5000);
         }
 
-        const form = document.getElementById('loginForm');
-        const mfaGroup = document.getElementById('mfaGroup');
-        let requiresMFA = false;
-        let tempToken = null;
-        
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            if (!form) {
+                console.error('Login form not found');
+                return;
+            }
             
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
+            const mfaGroup = document.getElementById('mfaGroup');
+            let requiresMFA = false;
+            let tempToken = null;
             
-            // Clear previous errors
-            document.querySelectorAll('.form-error').forEach(el => {
-                el.classList.remove('show');
-                el.textContent = '';
-            });
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Signing in...';
-            
-            try {
-                let response;
-                let result;
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                if (requiresMFA && tempToken) {
-                    // Verify MFA code
-                    submitBtn.textContent = 'Verifying...';
-                    response = await fetch('/api/auth/verify-mfa', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            token: tempToken,
-                            code: data.mfaCode
-                        })
-                    });
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                
+                // Clear previous errors
+                document.querySelectorAll('.form-error').forEach(el => {
+                    el.classList.remove('show');
+                    el.textContent = '';
+                });
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                
+                try {
+                    let response;
+                    let result;
                     
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ error: 'Verification failed' }));
-                        throw new Error(errorData.error || 'Invalid verification code');
+                    if (requiresMFA && tempToken) {
+                        // Verify MFA code
+                        submitBtn.textContent = 'Verifying...';
+                        response = await fetch('/api/auth/verify-mfa', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                token: tempToken,
+                                code: data.mfaCode
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ error: 'Verification failed' }));
+                            throw new Error(errorData.error || 'Invalid verification code');
+                        }
+                        
+                        result = await response.json();
+                    } else {
+                        // Initial login
+                        response = await fetch('/api/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: data.email,
+                                password: data.password
+                            })
+                        });
+                        
+                        // Parse response
+                        result = await response.json().catch(() => {
+                            throw new Error('Invalid response from server');
+                        });
+                        
+                        if (response.status === 200 && result.requiresMFA) {
+                            requiresMFA = true;
+                            tempToken = result.tempToken;
+                            mfaGroup.classList.add('show');
+                            document.getElementById('mfaCode').focus();
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Verify Code';
+                            showToast('Please enter your MFA code', 'success');
+                            return;
+                        }
+                        
+                        // Check for errors
+                        if (!response.ok) {
+                            throw new Error(result.error || 'Login failed');
+                        }
                     }
                     
-                    result = await response.json();
-                } else {
-                    // Initial login
-                    response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: data.email,
-                            password: data.password
-                        })
-                    });
-                    
-                    // Parse response
-                    result = await response.json().catch(() => {
-                        throw new Error('Invalid response from server');
-                    });
-                    
-                    if (response.status === 200 && result.requiresMFA) {
-                        requiresMFA = true;
-                        tempToken = result.tempToken;
-                        mfaGroup.classList.add('show');
-                        document.getElementById('mfaCode').focus();
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Verify Code';
-                        showToast('Please enter your MFA code', 'success');
-                        return;
-                    }
-                    
-                    // Check for errors
-                    if (!response.ok) {
+                    // Success - redirect to dashboard
+                    if (response.ok && result.token) {
+                        // Store token and user info
+                        localStorage.setItem('token', result.token);
+                        localStorage.setItem('user', JSON.stringify(result.user));
+                        
+                        // Set cookie for server-side access
+                        document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                        
+                        // Show success toast
+                        showToast('Login successful! Redirecting...', 'success');
+                        
+                        // Redirect to dashboard after brief delay
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 500);
+                    } else {
                         throw new Error(result.error || 'Login failed');
                     }
-                }
-                
-                // Success - redirect to dashboard
-                if (response.ok && result.token) {
-                    // Store token and user info
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
+                } catch (error) {
+                    console.error('Login error:', error);
                     
-                    // Set cookie for server-side access
-                    document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                    // Show error toast
+                    const errorMessage = error.message || 'An error occurred. Please try again.';
+                    showToast(errorMessage, 'error');
                     
-                    // Show success toast
-                    showToast('Login successful! Redirecting...', 'success');
+                    // Also show in form field
+                    const errorField = errorMessage.toLowerCase().includes('password') || errorMessage.toLowerCase().includes('invalid') ? 'passwordError' : 'emailError';
+                    if (requiresMFA) {
+                        document.getElementById('mfaError').textContent = errorMessage;
+                        document.getElementById('mfaError').classList.add('show');
+                    } else {
+                        document.getElementById(errorField).textContent = errorMessage;
+                        document.getElementById(errorField).classList.add('show');
+                    }
                     
-                    // Redirect to dashboard after brief delay
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 500);
-                } else {
-                    throw new Error(result.error || 'Login failed');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign In';
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                
-                // Show error toast
-                const errorMessage = error.message || 'An error occurred. Please try again.';
-                showToast(errorMessage, 'error');
-                
-                // Also show in form field
-                const errorField = errorMessage.toLowerCase().includes('password') || errorMessage.toLowerCase().includes('invalid') ? 'passwordError' : 'emailError';
-                if (requiresMFA) {
-                    document.getElementById('mfaError').textContent = errorMessage;
-                    document.getElementById('mfaError').classList.add('show');
-                } else {
-                    document.getElementById(errorField).textContent = errorMessage;
-                    document.getElementById(errorField).classList.add('show');
-                }
-                
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Sign In';
+            });
+            
+            // Check for error in URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorParam = urlParams.get('error');
+            if (errorParam) {
+                const errorMessages = {
+                    'session_expired': 'Your session has expired. Please login again.',
+                    'account_not_found': 'Account not found. Please try again.',
+                    'oauth_failed': 'OAuth authentication failed. Please try again.',
+                    'dashboard_error': 'Error loading dashboard. Please try again.'
+                };
+                showToast(errorMessages[errorParam] || 'An error occurred', 'error');
             }
         });
-        
-        // Check for error in URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const errorParam = urlParams.get('error');
-        if (errorParam) {
-            const errorMessages = {
-                'session_expired': 'Your session has expired. Please login again.',
-                'account_not_found': 'Account not found. Please try again.',
-                'oauth_failed': 'OAuth authentication failed. Please try again.',
-                'dashboard_error': 'Error loading dashboard. Please try again.'
-            };
-            showToast(errorMessages[errorParam] || 'An error occurred', 'error');
-        }
     </script>
 </body>
 </html>
