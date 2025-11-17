@@ -265,7 +265,7 @@
             <h1 class="auth-title">Welcome Back</h1>
             <p class="auth-subtitle">Sign in to your account</p>
             
-            <form id="loginForm" method="POST" action="#" onsubmit="return false;">
+            <form id="loginForm" onsubmit="event.preventDefault(); return false;">
                 <div class="form-group">
                     <label class="form-label" for="email">Email</label>
                     <input type="email" id="email" name="email" class="form-input" required autofocus>
@@ -465,7 +465,8 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Sign In';
                 }
-            });
+                return false;
+            }, true); // Use capture phase to ensure it runs first
             
             // Check for error in URL params
             const urlParams = new URLSearchParams(window.location.search);
