@@ -228,7 +228,7 @@ describe('Authentication API', () => {
                     email: testEmail,
                     password: testPassword,
                 });
-            tempToken = loginRes.body.tempToken;
+            ({ tempToken } = loginRes.body);
         });
 
         it('should verify valid MFA code', async () => {
