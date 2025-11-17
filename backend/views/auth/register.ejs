@@ -232,7 +232,7 @@
     
     <script>
         // Toast notification system
-        function showToast(message, type = 'error') {
+        const showToast = (message, type = 'error') => {
             const container = document.getElementById('toastContainer');
             if (!container) return;
             
@@ -252,7 +252,7 @@
             // Add event listener to close button
             const closeBtn = toast.querySelector('.toast-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
+                closeBtn.addEventListener('click', () => {
                     toast.classList.add('hiding');
                     setTimeout(() => toast.remove(), 300);
                 });
@@ -265,10 +265,10 @@
                 toast.classList.add('hiding');
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
-        }
+        };
 
         // Wait for DOM to be ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('registerForm');
             if (!form) {
                 console.error('Register form not found');
@@ -283,8 +283,8 @@
             
             // Password strength indicator
             if (passwordInput && strengthBar) {
-                passwordInput.addEventListener('input', function() {
-                    const password = this.value;
+                passwordInput.addEventListener('input', (e) => {
+                    const password = e.target.value;
                     let strength = 'weak';
                     
                     if (password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password)) {
@@ -293,12 +293,12 @@
                         strength = 'medium';
                     }
                     
-                    strengthBar.className = 'password-strength-bar password-strength-' + strength;
+                    strengthBar.className = `password-strength-bar password-strength-${strength}`;
                 });
             }
 
             // Form validation
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();

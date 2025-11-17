@@ -318,7 +318,7 @@
     
     <script>
         // Toast notification system
-        function showToast(message, type = 'error') {
+        const showToast = (message, type = 'error') => {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -336,7 +336,7 @@
             // Add event listener to close button
             const closeBtn = toast.querySelector('.toast-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
+                closeBtn.addEventListener('click', () => {
                     toast.classList.add('hiding');
                     setTimeout(() => toast.remove(), 300);
                 });
@@ -349,10 +349,10 @@
                 toast.classList.add('hiding');
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
-        }
+        };
 
         // Wait for DOM to be ready
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('loginForm');
             if (!form) {
                 console.error('Login form not found');
@@ -366,7 +366,7 @@
             let requiresMFA = false;
             let tempToken = null;
             
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();

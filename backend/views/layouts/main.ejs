@@ -25,12 +25,12 @@
     
     <script>
         // Mobile menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
             const nav = document.querySelector('.main-nav');
             
             if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.addEventListener('click', () => {
                     nav.classList.toggle('nav-open');
                     mobileMenuToggle.classList.toggle('active');
                 });
@@ -39,7 +39,7 @@
             // Logout functionality
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', async function() {
+                logoutBtn.addEventListener('click', async () => {
                     try {
                         await fetch('/api/dashboard/logout', {
                             method: 'POST',

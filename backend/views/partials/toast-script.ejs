@@ -1,5 +1,5 @@
         // Toast notification system
-        function showToast(message, type = 'error') {
+        const showToast = (message, type = 'error') => {
             const container = document.getElementById('toastContainer');
             if (!container) return;
             
@@ -19,7 +19,7 @@
             // Add event listener to close button
             const closeBtn = toast.querySelector('.toast-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
+                closeBtn.addEventListener('click', () => {
                     toast.classList.add('hiding');
                     setTimeout(() => toast.remove(), 300);
                 });
@@ -32,13 +32,13 @@
                 toast.classList.add('hiding');
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
-        }
+        };
         
         // Event delegation for toast close buttons (for dynamically created toasts)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('toastContainer');
             if (container) {
-                container.addEventListener('click', function(e) {
+                container.addEventListener('click', (e) => {
                     if (e.target.classList.contains('toast-close')) {
                         const toast = e.target.closest('.toast');
                         if (toast) {
