@@ -163,10 +163,102 @@
         .forgot-password a:hover {
             text-decoration: underline;
         }
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .toast {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid;
+        }
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+        .toast.error .toast-icon {
+            color: var(--danger-color);
+        }
+        .toast.success .toast-icon {
+            color: var(--success-color);
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        .toast-message {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toast-close:hover {
+            color: var(--text-primary);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        .toast.hiding {
+            animation: slideOut 0.3s ease;
+        }
     </style>
 </head>
 <body>
     <%- include('../partials/header', { title: 'Login' }) %>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
     
     <div class="auth-container">
         <div class="auth-card">
@@ -225,6 +317,31 @@
     <%- include('../partials/footer') %>
     
     <script>
+        // Toast notification system
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'error' ? '❌' : '✅';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${type === 'error' ? 'Error' : 'Success'}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
         const form = document.getElementById('loginForm');
         const mfaGroup = document.getElementById('mfaGroup');
         let requiresMFA = false;
@@ -244,6 +361,7 @@
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
             
             try {
                 let response;
@@ -260,10 +378,15 @@
                             code: data.mfaCode
                         })
                     });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Verification failed' }));
+                        throw new Error(errorData.error || 'Invalid verification code');
+                    }
+                    
                     result = await response.json();
                 } else {
                     // Initial login
-                    submitBtn.textContent = 'Signing in...';
                     response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -272,7 +395,11 @@
                             password: data.password
                         })
                     });
-                    result = await response.json();
+                    
+                    // Parse response
+                    result = await response.json().catch(() => {
+                        throw new Error('Invalid response from server');
+                    });
                     
                     if (response.status === 200 && result.requiresMFA) {
                         requiresMFA = true;
@@ -281,38 +408,69 @@
                         document.getElementById('mfaCode').focus();
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Verify Code';
+                        showToast('Please enter your MFA code', 'success');
                         return;
+                    }
+                    
+                    // Check for errors
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Login failed');
                     }
                 }
                 
-                if (response.ok) {
-                    // Store token and redirect to dashboard
+                // Success - redirect to dashboard
+                if (response.ok && result.token) {
+                    // Store token and user info
                     localStorage.setItem('token', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
                     
                     // Set cookie for server-side access
                     document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
                     
-                    window.location.href = '/dashboard';
+                    // Show success toast
+                    showToast('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect to dashboard after brief delay
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 500);
                 } else {
-                    // Show error
-                    const errorField = result.error.toLowerCase().includes('password') ? 'passwordError' : 'emailError';
-                    if (requiresMFA) {
-                        document.getElementById('mfaError').textContent = result.error;
-                        document.getElementById('mfaError').classList.add('show');
-                    } else {
-                        document.getElementById(errorField).textContent = result.error;
-                        document.getElementById(errorField).classList.add('show');
-                    }
+                    throw new Error(result.error || 'Login failed');
                 }
             } catch (error) {
-                document.getElementById('emailError').textContent = 'An error occurred. Please try again.';
-                document.getElementById('emailError').classList.add('show');
-            } finally {
+                console.error('Login error:', error);
+                
+                // Show error toast
+                const errorMessage = error.message || 'An error occurred. Please try again.';
+                showToast(errorMessage, 'error');
+                
+                // Also show in form field
+                const errorField = errorMessage.toLowerCase().includes('password') || errorMessage.toLowerCase().includes('invalid') ? 'passwordError' : 'emailError';
+                if (requiresMFA) {
+                    document.getElementById('mfaError').textContent = errorMessage;
+                    document.getElementById('mfaError').classList.add('show');
+                } else {
+                    document.getElementById(errorField).textContent = errorMessage;
+                    document.getElementById(errorField).classList.add('show');
+                }
+                
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Sign In';
             }
         });
+        
+        // Check for error in URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorParam = urlParams.get('error');
+        if (errorParam) {
+            const errorMessages = {
+                'session_expired': 'Your session has expired. Please login again.',
+                'account_not_found': 'Account not found. Please try again.',
+                'oauth_failed': 'OAuth authentication failed. Please try again.',
+                'dashboard_error': 'Error loading dashboard. Please try again.'
+            };
+            showToast(errorMessages[errorParam] || 'An error occurred', 'error');
+        }
     </script>
 </body>
 </html>
