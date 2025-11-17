@@ -216,7 +216,7 @@
             
             submitBtn.addEventListener('click', handleVerifyMFA);
             
-            // Auto-submit when 6 digits are entered (already handled above)
+            // Auto-submit when 6 digits are entered
             if (codeInput) {
                 codeInput.addEventListener('input', (e) => {
                     e.target.value = e.target.value.replace(/\D/g, ''); // Only numbers
