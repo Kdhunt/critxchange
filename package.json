@@ -7,6 +7,7 @@
     "start": "node backend/index.js",
     "dev": "nodemon backend/index.js",
     "test": "jest",
+    "test:auth": "node scripts/test-auth.js",
     "frontend": "vite --config frontend/vite.config.js",
     "migrate": "node scripts/run-migrations.js"
   },
