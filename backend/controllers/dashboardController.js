@@ -6,7 +6,7 @@ class DashboardController {
     /**
      * Render dashboard page
      */
-    static async renderDashboard(req, res) {
+    static renderDashboard(req, res) {
         try {
             res.render('dashboard', {
                 title: 'Dashboard',

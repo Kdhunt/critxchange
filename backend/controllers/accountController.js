@@ -13,7 +13,7 @@ class AccountController {
     static excludePassword(account) {
         if (!account) return null;
         const accountObj = account.toJSON ? account.toJSON() : account;
-        const { password, ...accountWithoutPassword } = accountObj;
+        const { password: _password, ...accountWithoutPassword } = accountObj;
         return accountWithoutPassword;
     }
 
@@ -114,7 +114,7 @@ class AccountController {
      */
     static async updateAccount(req, res) {
         try {
-            const accountId = parseInt(req.params.id);
+            const accountId = parseInt(req.params.id, 10);
 
             // Users can only update their own account (unless admin in future)
             if (req.user.id !== accountId) {
@@ -182,7 +182,7 @@ class AccountController {
      */
     static async deleteAccount(req, res) {
         try {
-            const accountId = parseInt(req.params.id);
+            const accountId = parseInt(req.params.id, 10);
 
             // Users can only delete their own account (unless admin in future)
             if (req.user.id !== accountId) {

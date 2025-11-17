@@ -25,12 +25,12 @@ const requireAuth = async (req, res, next) => {
             }
         }
         // Check for token in cookie
-        else if (req.cookies && req.cookies.token) {
-            token = req.cookies.token;
+        else if (req.cookies?.token) {
+            ({ token } = req.cookies);
         }
         // Check for token in session
-        else if (req.session && req.session.token) {
-            token = req.session.token;
+        else if (req.session?.token) {
+            ({ token } = req.session);
         }
         // Check for token in Authorization header
         else if (req.headers.authorization) {
