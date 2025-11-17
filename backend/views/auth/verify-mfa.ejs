@@ -113,7 +113,7 @@
                     <div class="form-error" id="mfaError"></div>
                 </div>
                 
-                <button type="submit" class="btn-submit" id="submitBtn">Verify</button>
+                <button type="button" class="btn-submit" id="submitBtn">Verify</button>
             </form>
         </div>
     </div>
@@ -146,14 +146,11 @@
                 });
             }
             
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const handleVerifyMFA = async () => {
                 const code = codeInput.value;
                 const mfaError = document.getElementById('mfaError');
-                const submitBtn = document.getElementById('submitBtn');
                 
                 if (code.length !== 6) {
                     const errorMsg = 'Please enter a 6-digit code';
@@ -225,8 +222,26 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Verify';
                 }
-                return false;
-            }, true); // Use capture phase
+            };
+            
+            submitBtn.addEventListener('click', handleVerifyMFA);
+            
+            // Auto-submit when 6 digits are entered (already handled above)
+            if (codeInput) {
+                codeInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, ''); // Only numbers
+                    if (e.target.value.length === 6) {
+                        handleVerifyMFA();
+                    }
+                });
+            }
+            
+            form.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    e.preventDefault();
+                    handleVerifyMFA();
+                }
+            });
         });
     </script>
 </body>

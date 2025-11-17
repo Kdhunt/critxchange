@@ -289,7 +289,7 @@
                     <div class="form-error" id="mfaError"></div>
                 </div>
                 
-                <button type="submit" class="btn-submit" id="submitBtn">Sign In</button>
+                <button type="button" class="btn-submit" id="submitBtn">Sign In</button>
             </form>
             
             <div class="divider">
@@ -366,11 +366,9 @@
             let requiresMFA = false;
             let tempToken = null;
             
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const handleLogin = async () => {
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData);
                 
@@ -380,7 +378,23 @@
                     el.textContent = '';
                 });
                 
-                const submitBtn = document.getElementById('submitBtn');
+                // Client-side validation
+                if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                    const errorMsg = 'Please enter a valid email address';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('emailError').textContent = errorMsg;
+                    document.getElementById('emailError').classList.add('show');
+                    return;
+                }
+                
+                if (!data.password) {
+                    const errorMsg = 'Please enter your password';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('passwordError').textContent = errorMsg;
+                    document.getElementById('passwordError').classList.add('show');
+                    return;
+                }
+                
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Signing in...';
                 
@@ -478,8 +492,18 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Sign In';
                 }
-                return false;
-            }, true); // Use capture phase to ensure it runs first
+            };
+            
+            // Attach click handler to button
+            submitBtn.addEventListener('click', handleLogin);
+            
+            // Also handle Enter key in form fields
+            form.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    e.preventDefault();
+                    handleLogin();
+                }
+            });
             
             // Check for error in URL params
             const urlParams = new URLSearchParams(window.location.search);

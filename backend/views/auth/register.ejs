@@ -203,7 +203,7 @@
                     <div class="form-error" id="confirmPasswordError"></div>
                 </div>
                 
-                <button type="submit" class="btn-submit" id="submitBtn">Create Account</button>
+                <button type="button" class="btn-submit" id="submitBtn">Create Account</button>
             </form>
             
             <div class="divider">
@@ -297,12 +297,10 @@
                 });
             }
 
-            // Form validation
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
+            // Handle button click instead of form submission
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const handleRegistration = async () => {
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData);
                 
@@ -313,6 +311,30 @@
                 });
                 
                 // Client-side validation
+                if (!data.username || data.username.length < 3) {
+                    const errorMsg = 'Username must be at least 3 characters';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('usernameError').textContent = errorMsg;
+                    document.getElementById('usernameError').classList.add('show');
+                    return;
+                }
+                
+                if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                    const errorMsg = 'Please enter a valid email address';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('emailError').textContent = errorMsg;
+                    document.getElementById('emailError').classList.add('show');
+                    return;
+                }
+                
+                if (!data.password || data.password.length < 6) {
+                    const errorMsg = 'Password must be at least 6 characters';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('passwordError').textContent = errorMsg;
+                    document.getElementById('passwordError').classList.add('show');
+                    return;
+                }
+                
                 if (data.password !== data.confirmPassword) {
                     const errorMsg = 'Passwords do not match';
                     showToast(errorMsg, 'error');
@@ -321,7 +343,6 @@
                     return;
                 }
                 
-                const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Creating Account...';
                 
@@ -378,8 +399,18 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Account';
                 }
-                return false;
-            }, true); // Use capture phase
+            };
+            
+            // Attach click handler to button
+            submitBtn.addEventListener('click', handleRegistration);
+            
+            // Also handle Enter key in form fields
+            form.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    e.preventDefault();
+                    handleRegistration();
+                }
+            });
         });
     </script>
 </body>
