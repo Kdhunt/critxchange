@@ -121,6 +121,8 @@
     <%- include('../partials/footer') %>
     
     <script>
+        <%- include('../partials/toast-script') %>
+        
         const form = document.getElementById('verifyMfaForm');
         const codeInput = document.getElementById('mfaCode');
         
@@ -140,7 +142,9 @@
             const submitBtn = document.getElementById('submitBtn');
             
             if (code.length !== 6) {
-                mfaError.textContent = 'Please enter a 6-digit code';
+                const errorMsg = 'Please enter a 6-digit code';
+                showToast(errorMsg, 'error');
+                mfaError.textContent = errorMsg;
                 mfaError.classList.add('show');
                 return;
             }
@@ -153,7 +157,9 @@
                 // Get temp token from session
                 const tokenResponse = await fetch('/auth/temp-token');
                 if (!tokenResponse.ok) {
-                    mfaError.textContent = 'Session expired. Please login again.';
+                    const errorMsg = 'Session expired. Please login again.';
+                    showToast(errorMsg, 'error');
+                    mfaError.textContent = errorMsg;
                     mfaError.classList.add('show');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Verify';
