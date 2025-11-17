@@ -8,6 +8,8 @@ const apiRoutes = require('./routes/api');
 const accountRoutes = require('./routes/account');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
+const PageController = require('./controllers/pageController');
+const DashboardController = require('./controllers/dashboardController');
 const requireAuth = require('./middleware/viewAuth');
 const optionalAuth = require('./middleware/optionalAuth');
 const cookieParser = require('cookie-parser');
@@ -64,38 +66,12 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', optionalAuth, (req, res) => {
-    try {
-        res.render('index', { 
-            title: 'Home',
-            user: req.user || null
-        });
-    } catch (err) {
-        console.error('Error rendering home page:', err);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-
-app.get('/about', optionalAuth, (req, res) => {
-    res.render('about', { 
-        title: 'About',
-        user: req.user || null
-    });
-});
+// Page routes
+app.get('/', optionalAuth, PageController.renderHome);
+app.get('/about', optionalAuth, PageController.renderAbout);
 
 // Dashboard route (protected)
-app.get('/dashboard', requireAuth, async (req, res) => {
-    try {
-        res.render('dashboard', { 
-            title: 'Dashboard',
-            user: req.user
-        });
-    } catch (err) {
-        console.error('Error rendering dashboard:', err);
-        res.redirect('/auth/login?error=dashboard_error');
-    }
-});
+app.get('/dashboard', requireAuth, DashboardController.renderDashboard);
 
 // 404 handler for undefined routes
 app.use((req, res) => {
