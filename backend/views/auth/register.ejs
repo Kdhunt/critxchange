@@ -299,6 +299,10 @@
 
             // Handle button click instead of form submission
             const submitBtn = document.getElementById('submitBtn');
+            if (!submitBtn) {
+                console.error('Submit button not found');
+                return;
+            }
             
             const handleRegistration = async () => {
                 const formData = new FormData(form);
@@ -402,15 +406,23 @@
             };
             
             // Attach click handler to button
-            submitBtn.addEventListener('click', handleRegistration);
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRegistration();
+            });
             
             // Also handle Enter key in form fields
             form.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !submitBtn.disabled) {
                     e.preventDefault();
+                    e.stopPropagation();
                     handleRegistration();
                 }
             });
+            
+            // Debug: Log that handler is attached
+            console.log('Registration form initialized, button handler attached');
         });
     </script>
 </body>
