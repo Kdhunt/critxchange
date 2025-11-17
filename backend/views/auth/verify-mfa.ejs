@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify MFA - CritXChange</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .auth-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+        }
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            transition: var(--transition);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        .form-error {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .form-error.show {
+            display: block;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header', { title: 'Verify MFA' }) %>
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">Two-Factor Authentication</h1>
+            <p class="auth-subtitle">Enter the 6-digit code from your authenticator app</p>
+            
+            <form id="verifyMfaForm">
+                <div class="form-group">
+                    <label class="form-label" for="mfaCode">Verification Code</label>
+                    <input type="text" id="mfaCode" name="mfaCode" class="form-input" 
+                           maxlength="6" pattern="[0-9]{6}" placeholder="000000" 
+                           autocomplete="off" autofocus>
+                    <div class="form-error" id="mfaError"></div>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="submitBtn">Verify</button>
+            </form>
+        </div>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        const form = document.getElementById('verifyMfaForm');
+        const codeInput = document.getElementById('mfaCode');
+        
+        // Auto-submit when 6 digits are entered
+        codeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Only numbers
+            if (this.value.length === 6) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const code = codeInput.value;
+            const mfaError = document.getElementById('mfaError');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (code.length !== 6) {
+                mfaError.textContent = 'Please enter a 6-digit code';
+                mfaError.classList.add('show');
+                return;
+            }
+            
+            mfaError.classList.remove('show');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+            
+            try {
+                // Get temp token from session
+                const tokenResponse = await fetch('/auth/temp-token');
+                if (!tokenResponse.ok) {
+                    mfaError.textContent = 'Session expired. Please login again.';
+                    mfaError.classList.add('show');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Verify';
+                    return;
+                }
+                
+                const { token: tempToken } = await tokenResponse.json();
+                
+                // Verify MFA code
+                const response = await fetch('/api/auth/verify-mfa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: tempToken,
+                        code: code
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    window.location.href = '/';
+                } else {
+                    mfaError.textContent = result.error || 'Invalid code. Please try again.';
+                    mfaError.classList.add('show');
+                    codeInput.value = '';
+                    codeInput.focus();
+                }
+            } catch (error) {
+                mfaError.textContent = 'An error occurred. Please try again.';
+                mfaError.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Verify';
+            }
+        });
+    </script>
+</body>
+</html>
+

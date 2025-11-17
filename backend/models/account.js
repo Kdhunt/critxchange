@@ -12,7 +12,28 @@ module.exports = (sequelize, DataTypes) => {
         },
         password: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true, // Allow null for OAuth-only accounts
+        },
+        mfaSecret: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        mfaEnabled: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
+        passwordResetToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        passwordResetExpires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+        googleId: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
         },
     });
 

@@ -1,11 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const session = require('express-session');
 const passport = require('passport');
 const path = require('path');
 const apiRoutes = require('./routes/api');
 const accountRoutes = require('./routes/account');
 const authRoutes = require('./routes/auth');
+
+// Initialize passport config
+require('./config/passport');
 
 const app = express();
 
@@ -14,10 +18,24 @@ app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'dev-secret-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
 app.use(passport.initialize());
+app.use(passport.session());
 
 // Import and use routes
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes); // Auth pages (login, register, etc.)
+app.use('/api/auth', authRoutes); // Auth API endpoints
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
 
