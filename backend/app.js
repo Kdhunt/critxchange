@@ -21,19 +21,20 @@ const app = express();
 
 app.use(cors());
 
-// Configure Helmet with CSP that allows inline scripts using nonces
+// Configure Helmet with CSP that allows inline scripts and Google OAuth
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow inline scripts for EJS templates
-            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
-            imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'"],
-            fontSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com"], // Allow inline scripts and Google OAuth
+            styleSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com"], // Allow inline styles and Google OAuth
+            imgSrc: ["'self'", "data:", "https:", "https://accounts.google.com", "https://*.googleusercontent.com"],
+            connectSrc: ["'self'", "https://accounts.google.com", "https://www.googleapis.com"], // Allow Google OAuth API calls
+            fontSrc: ["'self'", "https://accounts.google.com"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
-            frameSrc: ["'none'"],
+            frameSrc: ["'self'", "https://accounts.google.com"], // Allow Google OAuth iframe/popup
+            formAction: ["'self'", "https://accounts.google.com"], // Allow form submissions to Google
         },
     },
 }));
@@ -49,7 +50,8 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax', // Allow OAuth redirects
     }
 }));
 

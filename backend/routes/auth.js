@@ -35,9 +35,7 @@ router.get('/google', (req, res, next) => {
 });
 
 router.get('/google/callback',
-    (req, res, next) => {
-        passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' })(req, res, next);
-    },
+    passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' }),
     AuthController.handleOAuthCallback,
 );
 
