@@ -90,10 +90,14 @@
             cursor: not-allowed;
             transform: none;
         }
+        <%- include('../partials/toast-styles') %>
     </style>
 </head>
 <body>
     <%- include('../partials/header', { title: 'Verify MFA' }) %>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
     
     <div class="auth-container">
         <div class="auth-card">
@@ -168,26 +172,36 @@
                     })
                 });
                 
-                const result = await response.json();
+                const result = await response.json().catch(() => {
+                    throw new Error('Invalid response from server');
+                });
                 
-                if (response.ok) {
+                if (response.ok && result.token) {
                     localStorage.setItem('token', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
                     
                     // Set cookie for server-side access
                     document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
                     
-                    window.location.href = '/dashboard';
+                    showToast('Verification successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 500);
                 } else {
-                    mfaError.textContent = result.error || 'Invalid code. Please try again.';
+                    const errorMsg = result.error || 'Invalid code. Please try again.';
+                    showToast(errorMsg, 'error');
+                    mfaError.textContent = errorMsg;
                     mfaError.classList.add('show');
                     codeInput.value = '';
                     codeInput.focus();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Verify';
                 }
             } catch (error) {
-                mfaError.textContent = 'An error occurred. Please try again.';
+                const errorMsg = error.message || 'An error occurred. Please try again.';
+                showToast(errorMsg, 'error');
+                mfaError.textContent = errorMsg;
                 mfaError.classList.add('show');
-            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Verify';
             }

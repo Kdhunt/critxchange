@@ -1,0 +1,27 @@
+        // Toast notification system
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'error' ? '❌' : '✅';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${type === 'error' ? 'Error' : 'Success'}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+

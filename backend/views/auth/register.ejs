@@ -164,6 +164,9 @@
 <body>
     <%- include('../partials/header', { title: 'Register' }) %>
     
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
     <div class="auth-container">
         <div class="auth-card">
             <h1 class="auth-title">Create Account</h1>
@@ -247,6 +250,31 @@
             strengthBar.className = 'password-strength-bar password-strength-' + strength;
         });
         
+        // Toast notification system
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'error' ? '❌' : '✅';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-content">
+                    <div class="toast-title">${type === 'error' ? 'Error' : 'Success'}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
         // Form validation
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -262,7 +290,9 @@
             
             // Client-side validation
             if (data.password !== data.confirmPassword) {
-                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                const errorMsg = 'Passwords do not match';
+                showToast(errorMsg, 'error');
+                document.getElementById('confirmPasswordError').textContent = errorMsg;
                 document.getElementById('confirmPasswordError').classList.add('show');
                 return;
             }
@@ -282,29 +312,45 @@
                     })
                 });
                 
-                const result = await response.json();
+                const result = await response.json().catch(() => {
+                    throw new Error('Invalid response from server');
+                });
                 
-                if (response.ok) {
-                    // Store token and redirect to dashboard
+                if (response.ok && result.token) {
+                    // Store token and user info
                     localStorage.setItem('token', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
                     
                     // Set cookie for server-side access
                     document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
                     
-                    window.location.href = '/dashboard';
+                    // Show success toast
+                    showToast('Account created successfully! Redirecting...', 'success');
+                    
+                    // Redirect to dashboard after brief delay
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 500);
                 } else {
                     // Show error
-                    const errorField = result.error.toLowerCase().includes('email') ? 'emailError' :
-                                     result.error.toLowerCase().includes('username') ? 'usernameError' :
+                    const errorMessage = result.error || 'Registration failed';
+                    showToast(errorMessage, 'error');
+                    
+                    const errorField = errorMessage.toLowerCase().includes('email') ? 'emailError' :
+                                     errorMessage.toLowerCase().includes('username') ? 'usernameError' :
                                      'passwordError';
-                    document.getElementById(errorField).textContent = result.error;
+                    document.getElementById(errorField).textContent = errorMessage;
                     document.getElementById(errorField).classList.add('show');
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account';
                 }
             } catch (error) {
-                document.getElementById('emailError').textContent = 'An error occurred. Please try again.';
+                console.error('Registration error:', error);
+                const errorMessage = error.message || 'An error occurred. Please try again.';
+                showToast(errorMessage, 'error');
+                document.getElementById('emailError').textContent = errorMessage;
                 document.getElementById('emailError').classList.add('show');
-            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
             }
