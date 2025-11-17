@@ -152,10 +152,10 @@
                 e.stopImmediatePropagation();
                 
                 const code = codeInput.value;
-            const mfaError = document.getElementById('mfaError');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (code.length !== 6) {
+                const mfaError = document.getElementById('mfaError');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                if (code.length !== 6) {
                 const errorMsg = 'Please enter a 6-digit code';
                 showToast(errorMsg, 'error');
                 mfaError.textContent = errorMsg;

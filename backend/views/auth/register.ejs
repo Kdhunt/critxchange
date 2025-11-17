@@ -302,9 +302,9 @@
                     el.classList.remove('show');
                     el.textContent = '';
                 });
-            
-            // Client-side validation
-            if (data.password !== data.confirmPassword) {
+                
+                // Client-side validation
+                if (data.password !== data.confirmPassword) {
                 const errorMsg = 'Passwords do not match';
                 showToast(errorMsg, 'error');
                 document.getElementById('confirmPasswordError').textContent = errorMsg;
@@ -312,63 +312,63 @@
                 return;
             }
             
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating Account...';
-            
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: data.username,
-                        email: data.email,
-                        password: data.password
-                    })
-                });
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating Account...';
                 
-                const result = await response.json().catch(() => {
-                    throw new Error('Invalid response from server');
-                });
-                
-                if (response.ok && result.token) {
-                    // Store token and user info
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
+                try {
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: data.username,
+                            email: data.email,
+                            password: data.password
+                        })
+                    });
                     
-                    // Set cookie for server-side access
-                    document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                    const result = await response.json().catch(() => {
+                        throw new Error('Invalid response from server');
+                    });
                     
-                    // Show success toast
-                    showToast('Account created successfully! Redirecting...', 'success');
-                    
-                    // Redirect to dashboard after brief delay
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 500);
-                } else {
-                    // Show error
-                    const errorMessage = result.error || 'Registration failed';
+                    if (response.ok && result.token) {
+                        // Store token and user info
+                        localStorage.setItem('token', result.token);
+                        localStorage.setItem('user', JSON.stringify(result.user));
+                        
+                        // Set cookie for server-side access
+                        document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                        
+                        // Show success toast
+                        showToast('Account created successfully! Redirecting...', 'success');
+                        
+                        // Redirect to dashboard after brief delay
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 500);
+                    } else {
+                        // Show error
+                        const errorMessage = result.error || 'Registration failed';
+                        showToast(errorMessage, 'error');
+                        
+                        const errorField = errorMessage.toLowerCase().includes('email') ? 'emailError' :
+                                         errorMessage.toLowerCase().includes('username') ? 'usernameError' :
+                                         'passwordError';
+                        document.getElementById(errorField).textContent = errorMessage;
+                        document.getElementById(errorField).classList.add('show');
+                        
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Create Account';
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    const errorMessage = error.message || 'An error occurred. Please try again.';
                     showToast(errorMessage, 'error');
-                    
-                    const errorField = errorMessage.toLowerCase().includes('email') ? 'emailError' :
-                                     errorMessage.toLowerCase().includes('username') ? 'usernameError' :
-                                     'passwordError';
-                    document.getElementById(errorField).textContent = errorMessage;
-                    document.getElementById(errorField).classList.add('show');
-                    
+                    document.getElementById('emailError').textContent = errorMessage;
+                    document.getElementById('emailError').classList.add('show');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Account';
                 }
-            } catch (error) {
-                console.error('Registration error:', error);
-                const errorMessage = error.message || 'An error occurred. Please try again.';
-                showToast(errorMessage, 'error');
-                document.getElementById('emailError').textContent = errorMessage;
-                document.getElementById('emailError').classList.add('show');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Account';
-            }
                 return false;
             }, true); // Use capture phase
         });
