@@ -45,6 +45,17 @@ app.use('/api/dashboard', dashboardRoutes); // Dashboard routes
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
 
+// Handle GET requests to API endpoints (redirect to appropriate pages)
+app.get('/api/auth/login', (req, res) => {
+    res.redirect('/auth/login');
+});
+app.get('/api/auth/register', (req, res) => {
+    res.redirect('/auth/register');
+});
+app.get('/api/auth/forgot-password', (req, res) => {
+    res.redirect('/auth/forgot-password');
+});
+
 // Set EJS as the templating engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

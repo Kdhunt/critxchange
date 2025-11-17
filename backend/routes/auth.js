@@ -45,6 +45,11 @@ router.get('/reset-password', (req, res) => {
     res.render('auth/reset-password', { title: 'Reset Password', token });
 });
 
+// Handle GET requests to API login endpoint (redirect to login page)
+router.get('/api/auth/login', (req, res) => {
+    res.redirect('/auth/login');
+});
+
 // Login endpoint
 router.post('/login', async (req, res) => {
     try {
