@@ -46,6 +46,7 @@ app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
 
 // Handle GET requests to API endpoints (redirect to appropriate pages)
+// Note: POST requests to these endpoints work normally for form submissions
 app.get('/api/auth/login', (req, res) => {
     res.redirect('/auth/login');
 });
