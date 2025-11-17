@@ -408,23 +408,35 @@
             };
             
             // Attach click handler to button
-            submitBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleRegistration();
-            });
-            
-            // Also handle Enter key in form fields
-            form.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !submitBtn.disabled) {
+            try {
+                submitBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    handleRegistration();
-                }
-            });
-            
-            // Debug: Log that handler is attached
-            console.log('Registration form initialized, button handler attached');
+                    e.stopImmediatePropagation();
+                    console.log('Button clicked, calling handleRegistration');
+                    handleRegistration().catch((err) => {
+                        console.error('Error in handleRegistration:', err);
+                    });
+                });
+                
+                // Also handle Enter key in form fields
+                form.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !submitBtn.disabled) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        console.log('Enter key pressed, calling handleRegistration');
+                        handleRegistration().catch((err) => {
+                            console.error('Error in handleRegistration:', err);
+                        });
+                    }
+                });
+                
+                // Debug: Log that handler is attached
+                console.log('Registration form initialized, button handler attached', submitBtn);
+            } catch (error) {
+                console.error('Error attaching event handlers:', error);
+            }
         });
     </script>
 </body>
