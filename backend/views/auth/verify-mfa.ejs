@@ -123,21 +123,35 @@
     <script>
         <%- include('../partials/toast-script') %>
         
-        const form = document.getElementById('verifyMfaForm');
-        const codeInput = document.getElementById('mfaCode');
-        
-        // Auto-submit when 6 digits are entered
-        codeInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, ''); // Only numbers
-            if (this.value.length === 6) {
-                form.dispatchEvent(new Event('submit'));
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('verifyMfaForm');
+            if (!form) {
+                console.error('Verify MFA form not found');
+                return;
             }
-        });
-        
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
             
-            const code = codeInput.value;
+            // Prevent any form submission
+            form.setAttribute('novalidate', 'novalidate');
+            
+            const codeInput = document.getElementById('mfaCode');
+            
+            // Auto-submit when 6 digits are entered
+            if (codeInput) {
+                codeInput.addEventListener('input', function() {
+                    this.value = this.value.replace(/\D/g, ''); // Only numbers
+                    if (this.value.length === 6) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                });
+            }
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const code = codeInput.value;
             const mfaError = document.getElementById('mfaError');
             const submitBtn = document.getElementById('submitBtn');
             
@@ -211,6 +225,8 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Verify';
             }
+                return false;
+            }, true); // Use capture phase
         });
     </script>
 </body>
