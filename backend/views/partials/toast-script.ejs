@@ -13,8 +13,17 @@
                     <div class="toast-title">${type === 'error' ? 'Error' : 'Success'}</div>
                     <div class="toast-message">${message}</div>
                 </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                <button class="toast-close">×</button>
             `;
+            
+            // Add event listener to close button
+            const closeBtn = toast.querySelector('.toast-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }
             
             container.appendChild(toast);
             
@@ -24,4 +33,20 @@
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
         }
+        
+        // Event delegation for toast close buttons (for dynamically created toasts)
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('toastContainer');
+            if (container) {
+                container.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('toast-close')) {
+                        const toast = e.target.closest('.toast');
+                        if (toast) {
+                            toast.classList.add('hiding');
+                            setTimeout(() => toast.remove(), 300);
+                        }
+                    }
+                });
+            }
+        });
 

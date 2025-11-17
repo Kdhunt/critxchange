@@ -20,7 +20,23 @@ require('./config/passport');
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+
+// Configure Helmet with CSP that allows inline scripts using nonces
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow inline scripts for EJS templates
+            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
+    },
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
