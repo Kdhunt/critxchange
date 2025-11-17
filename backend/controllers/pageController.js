@@ -1,4 +1,3 @@
-const optionalAuth = require('../middleware/optionalAuth');
 
 /**
  * Page Controller
