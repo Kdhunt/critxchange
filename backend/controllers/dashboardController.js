@@ -8,9 +8,9 @@ class DashboardController {
      */
     static async renderDashboard(req, res) {
         try {
-            res.render('dashboard', { 
+            res.render('dashboard', {
                 title: 'Dashboard',
-                user: req.user
+                user: req.user,
             });
         } catch (err) {
             console.error('Error rendering dashboard:', err);
@@ -24,7 +24,7 @@ class DashboardController {
     static logout(req, res) {
         // Clear cookie
         res.clearCookie('token');
-        
+
         // Clear session
         if (req.session) {
             req.session.destroy((err) => {
@@ -33,10 +33,9 @@ class DashboardController {
                 }
             });
         }
-        
+
         res.json({ message: 'Logged out successfully' });
     }
 }
 
 module.exports = DashboardController;
-

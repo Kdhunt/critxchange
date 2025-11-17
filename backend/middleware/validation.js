@@ -36,4 +36,3 @@ const validateAccount = (req, res, next) => {
 };
 
 module.exports = { validateAccount };
-

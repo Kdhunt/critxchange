@@ -5,20 +5,19 @@ const router = express.Router();
 
 // Example CRUD routes
 router.get('/items', authenticateJWT, (req, res) => {
-  // Get all items
+    // Get all items
 });
 
 router.post('/items', authenticateJWT, (req, res) => {
-  // Create a new item
+    // Create a new item
 });
 
 router.put('/items/:id', authenticateJWT, (req, res) => {
-  // Update an item
+    // Update an item
 });
 
 router.delete('/items/:id', authenticateJWT, (req, res) => {
-  // Delete an item
+    // Delete an item
 });
 
 module.exports = router;
-

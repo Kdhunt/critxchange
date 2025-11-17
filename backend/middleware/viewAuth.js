@@ -18,7 +18,7 @@ const requireAuth = async (req, res, next) => {
                 httpOnly: false, // Allow client-side access
                 maxAge: 24 * 60 * 60 * 1000, // 24 hours
                 path: '/',
-                secure: process.env.NODE_ENV === 'production'
+                secure: process.env.NODE_ENV === 'production',
             });
             if (req.session) {
                 req.session.token = token;
@@ -35,21 +35,21 @@ const requireAuth = async (req, res, next) => {
         // Check for token in Authorization header
         else if (req.headers.authorization) {
             const authHeader = req.headers.authorization;
-            token = authHeader.startsWith('Bearer ') 
-                ? authHeader.slice(7) 
+            token = authHeader.startsWith('Bearer ')
+                ? authHeader.slice(7)
                 : authHeader;
         }
 
         if (!token) {
-            return res.redirect('/auth/login?redirect=' + encodeURIComponent(req.originalUrl));
+            return res.redirect(`/auth/login?redirect=${  encodeURIComponent(req.originalUrl)}`);
         }
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Fetch user from database
         const account = await Account.findByPk(decoded.id, {
-            attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] }
+            attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] },
         });
 
         if (!account) {
@@ -59,7 +59,7 @@ const requireAuth = async (req, res, next) => {
         // Attach user to request
         req.user = account;
         req.token = token;
-        
+
         next();
     } catch (error) {
         // Token invalid or expired
@@ -68,4 +68,3 @@ const requireAuth = async (req, res, next) => {
 };
 
 module.exports = requireAuth;
-

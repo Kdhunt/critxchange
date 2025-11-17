@@ -8,21 +8,21 @@ let testUserId = null;
 
 beforeAll(async () => {
     await sequelize.sync({ force: true });
-    
+
     // Create a test user and get auth token
     const testUser = await Account.create({
         username: 'testuser',
         email: 'testuser@example.com',
-        password: await bcrypt.hash('password123', 10)
+        password: await bcrypt.hash('password123', 10),
     });
     testUserId = testUser.id;
-    
+
     // Login to get token
     const loginRes = await request(app)
         .post('/api/auth/login')
         .send({
             email: 'testuser@example.com',
-            password: 'password123'
+            password: 'password123',
         });
     authToken = loginRes.body.token;
 });
@@ -38,7 +38,7 @@ describe('Account API', () => {
             .send({
                 username: `newuser_${Date.now()}`,
                 email: `newuser_${Date.now()}@example.com`,
-                password: 'password123'
+                password: 'password123',
             });
         expect(res.statusCode).toEqual(201);
         expect(res.body).toHaveProperty('id');
@@ -81,7 +81,7 @@ describe('Account API', () => {
             .put(`/api/accounts/${testUserId}`)
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                username: 'updateduser'
+                username: 'updateduser',
             });
         expect(res.statusCode).toEqual(200);
         expect(res.body).toHaveProperty('username', 'updateduser');
@@ -93,14 +93,14 @@ describe('Account API', () => {
         const otherUser = await Account.create({
             username: `otheruser_${Date.now()}`,
             email: `otheruser_${Date.now()}@example.com`,
-            password: await bcrypt.hash('password123', 10)
+            password: await bcrypt.hash('password123', 10),
         });
-        
+
         const res = await request(app)
             .put(`/api/accounts/${otherUser.id}`)
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                username: 'hacked'
+                username: 'hacked',
             });
         expect(res.statusCode).toEqual(403);
     });
@@ -110,18 +110,18 @@ describe('Account API', () => {
         const deleteUser = await Account.create({
             username: `deleteuser_${Date.now()}`,
             email: `deleteuser_${Date.now()}@example.com`,
-            password: await bcrypt.hash('password123', 10)
+            password: await bcrypt.hash('password123', 10),
         });
-        
+
         // Get token for this user
         const loginRes = await request(app)
             .post('/api/auth/login')
             .send({
                 email: deleteUser.email,
-                password: 'password123'
+                password: 'password123',
             });
         const deleteToken = loginRes.body.token;
-        
+
         const res = await request(app)
             .delete(`/api/accounts/${deleteUser.id}`)
             .set('Authorization', `Bearer ${deleteToken}`);
@@ -134,7 +134,7 @@ describe('Account API', () => {
             { method: 'get', path: '/api/accounts/me' },
             { method: 'get', path: `/api/accounts/${testUserId}` },
             { method: 'put', path: `/api/accounts/${testUserId}` },
-            { method: 'delete', path: `/api/accounts/${testUserId}` }
+            { method: 'delete', path: `/api/accounts/${testUserId}` },
         ];
 
         for (const route of routes) {

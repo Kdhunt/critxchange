@@ -23,7 +23,7 @@ class AccountController {
     static async getAllAccounts(req, res) {
         try {
             const accounts = await Account.findAll({
-                attributes: { exclude: ['password'] }
+                attributes: { exclude: ['password'] },
             });
             res.json(accounts);
         } catch (error) {
@@ -38,7 +38,7 @@ class AccountController {
     static async getCurrentAccount(req, res) {
         try {
             const account = await Account.findByPk(req.user.id, {
-                attributes: { exclude: ['password'] }
+                attributes: { exclude: ['password'] },
             });
             if (account) {
                 res.json(account);
@@ -57,7 +57,7 @@ class AccountController {
     static async getAccountById(req, res) {
         try {
             const account = await Account.findByPk(req.params.id, {
-                attributes: { exclude: ['password'] }
+                attributes: { exclude: ['password'] },
             });
             if (account) {
                 res.json(account);
@@ -85,8 +85,8 @@ class AccountController {
             // Check if account already exists
             const existingAccount = await Account.findOne({
                 where: {
-                    [Op.or]: [{ email }, { username }]
-                }
+                    [Op.or]: [{ email }, { username }],
+                },
             });
 
             if (existingAccount) {
@@ -95,16 +95,16 @@ class AccountController {
 
             const hashedPassword = await bcrypt.hash(password, 10);
             const newAccount = await Account.create({ username, email, password: hashedPassword });
-            
+
             res.status(201).json(AccountController.excludePassword(newAccount));
         } catch (error) {
             console.error('Error creating account:', error);
-            
+
             // Handle Sequelize validation errors
             if (error.name === 'SequelizeUniqueConstraintError') {
                 return res.status(409).json({ error: 'Account with this email or username already exists' });
             }
-            
+
             res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -115,7 +115,7 @@ class AccountController {
     static async updateAccount(req, res) {
         try {
             const accountId = parseInt(req.params.id);
-            
+
             // Users can only update their own account (unless admin in future)
             if (req.user.id !== accountId) {
                 return res.status(403).json({ error: 'You can only update your own account' });
@@ -144,9 +144,9 @@ class AccountController {
                         id: { [Op.ne]: accountId },
                         [Op.or]: [
                             ...(username ? [{ username }] : []),
-                            ...(email ? [{ email }] : [])
-                        ]
-                    }
+                            ...(email ? [{ email }] : []),
+                        ],
+                    },
                 });
 
                 if (conflictAccount) {
@@ -155,12 +155,12 @@ class AccountController {
             }
 
             const [updated] = await Account.update(updateData, {
-                where: { id: accountId }
+                where: { id: accountId },
             });
 
             if (updated) {
                 const updatedAccount = await Account.findByPk(accountId, {
-                    attributes: { exclude: ['password'] }
+                    attributes: { exclude: ['password'] },
                 });
                 res.json(updatedAccount);
             } else {
@@ -168,11 +168,11 @@ class AccountController {
             }
         } catch (error) {
             console.error('Error updating account:', error);
-            
+
             if (error.name === 'SequelizeUniqueConstraintError') {
                 return res.status(409).json({ error: 'Username or email already in use' });
             }
-            
+
             res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -183,7 +183,7 @@ class AccountController {
     static async deleteAccount(req, res) {
         try {
             const accountId = parseInt(req.params.id);
-            
+
             // Users can only delete their own account (unless admin in future)
             if (req.user.id !== accountId) {
                 return res.status(403).json({ error: 'You can only delete your own account' });
@@ -203,4 +203,3 @@ class AccountController {
 }
 
 module.exports = AccountController;
-

@@ -10,9 +10,9 @@ class PageController {
      */
     static renderHome(req, res) {
         try {
-            res.render('index', { 
+            res.render('index', {
                 title: 'Home',
-                user: req.user || null
+                user: req.user || null,
             });
         } catch (err) {
             console.error('Error rendering home page:', err);
@@ -25,9 +25,9 @@ class PageController {
      */
     static renderAbout(req, res) {
         try {
-            res.render('about', { 
+            res.render('about', {
                 title: 'About',
-                user: req.user || null
+                user: req.user || null,
             });
         } catch (err) {
             console.error('Error rendering about page:', err);
@@ -37,4 +37,3 @@ class PageController {
 }
 
 module.exports = PageController;
-

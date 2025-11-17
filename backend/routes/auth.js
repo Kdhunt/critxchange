@@ -25,12 +25,12 @@ router.post('/disable-mfa', authenticateJWT, AuthController.disableMFA);
 
 // OAuth routes
 router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email']
+    scope: ['profile', 'email'],
 }));
 
-router.get('/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' }), 
-    AuthController.handleOAuthCallback
+router.get('/google/callback',
+    passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' }),
+    AuthController.handleOAuthCallback,
 );
 
 // Utility routes

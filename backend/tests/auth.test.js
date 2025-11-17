@@ -27,7 +27,7 @@ describe('Authentication API', () => {
                 .send({
                     username: testUsername,
                     email: testEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(201);
@@ -37,7 +37,7 @@ describe('Authentication API', () => {
             expect(res.body.user).toHaveProperty('username', testUsername);
             expect(res.body.user).toHaveProperty('email', testEmail);
             expect(res.body.user).not.toHaveProperty('password');
-            
+
             testUser = res.body.user;
             testToken = res.body.token;
         });
@@ -46,7 +46,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/register')
                 .send({
-                    username: testUsername
+                    username: testUsername,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -59,7 +59,7 @@ describe('Authentication API', () => {
                 .send({
                     username: 'testuser2',
                     email: 'invalid-email',
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -72,7 +72,7 @@ describe('Authentication API', () => {
                 .send({
                     username: 'testuser3',
                     email: 'test3@example.com',
-                    password: '12345'
+                    password: '12345',
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -85,7 +85,7 @@ describe('Authentication API', () => {
                 .send({
                     username: 'differentuser',
                     email: testEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(409);
@@ -98,7 +98,7 @@ describe('Authentication API', () => {
                 .send({
                     username: testUsername,
                     email: 'different@example.com',
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(409);
@@ -108,13 +108,13 @@ describe('Authentication API', () => {
         it('should hash password before storing', async () => {
             const newEmail = `hash_test_${Date.now()}@example.com`;
             const newUsername = `hashtest_${Date.now()}`;
-            
+
             await request(app)
                 .post('/api/auth/register')
                 .send({
                     username: newUsername,
                     email: newEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             const account = await Account.findOne({ where: { email: newEmail } });
@@ -130,7 +130,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/login')
                 .send({
                     email: testEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -144,7 +144,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/login')
                 .send({
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -155,7 +155,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/login')
                 .send({
-                    email: testEmail
+                    email: testEmail,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -167,7 +167,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/login')
                 .send({
                     email: 'nonexistent@example.com',
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -179,7 +179,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/login')
                 .send({
                     email: testEmail,
-                    password: 'wrongpassword'
+                    password: 'wrongpassword',
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -198,7 +198,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/login')
                 .send({
                     email: testEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -226,7 +226,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/login')
                 .send({
                     email: testEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
             tempToken = loginRes.body.tempToken;
         });
@@ -234,14 +234,14 @@ describe('Authentication API', () => {
         it('should verify valid MFA code', async () => {
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             const res = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
                     token: tempToken,
-                    code: code
+                    code,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -254,7 +254,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/verify-mfa')
                 .send({
                     token: tempToken,
-                    code: '000000'
+                    code: '000000',
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -264,13 +264,13 @@ describe('Authentication API', () => {
         it('should reject missing token', async () => {
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             const res = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
-                    code: code
+                    code,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -281,7 +281,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
-                    token: tempToken
+                    token: tempToken,
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -293,19 +293,19 @@ describe('Authentication API', () => {
             const expiredToken = jwt.sign(
                 { id: testUser.id, mfaRequired: true },
                 process.env.JWT_SECRET || 'test-secret',
-                { expiresIn: '-1h' }
+                { expiresIn: '-1h' },
             );
 
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             const res = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
                     token: expiredToken,
-                    code: code
+                    code,
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -317,7 +317,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/forgot-password')
                 .send({
-                    email: testEmail
+                    email: testEmail,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -337,7 +337,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/forgot-password')
                 .send({
-                    email: 'nonexistent@example.com'
+                    email: 'nonexistent@example.com',
                 });
 
             // Should return same response for security
@@ -349,7 +349,7 @@ describe('Authentication API', () => {
             await request(app)
                 .post('/api/auth/forgot-password')
                 .send({
-                    email: testEmail
+                    email: testEmail,
                 });
 
             const account = await Account.findOne({ where: { email: testEmail } });
@@ -377,7 +377,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/reset-password')
                 .send({
                     token: resetToken,
-                    password: newPassword
+                    password: newPassword,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -394,7 +394,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/reset-password')
                 .send({
                     token: 'invalid-token',
-                    password: 'NewPass123!'
+                    password: 'NewPass123!',
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -410,7 +410,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/reset-password')
                 .send({
                     token: resetToken,
-                    password: 'NewPass123!'
+                    password: 'NewPass123!',
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -422,7 +422,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/reset-password')
                 .send({
                     token: resetToken,
-                    password: '12345'
+                    password: '12345',
                 });
 
             expect(res.statusCode).toEqual(400);
@@ -434,7 +434,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/reset-password')
                 .send({
                     token: resetToken,
-                    password: 'NewPass123!'
+                    password: 'NewPass123!',
                 });
 
             const account = await Account.findOne({ where: { email: testEmail } });
@@ -491,14 +491,14 @@ describe('Authentication API', () => {
         it('should enable MFA with valid code', async () => {
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             const res = await request(app)
                 .post('/api/auth/enable-mfa')
                 .set('Authorization', `Bearer ${testToken}`)
                 .send({
-                    code: code
+                    code,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -513,7 +513,7 @@ describe('Authentication API', () => {
                 .post('/api/auth/enable-mfa')
                 .set('Authorization', `Bearer ${testToken}`)
                 .send({
-                    code: '000000'
+                    code: '000000',
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -524,7 +524,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/enable-mfa')
                 .send({
-                    code: '123456'
+                    code: '123456',
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -544,7 +544,7 @@ describe('Authentication API', () => {
 
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             await request(app)
@@ -556,14 +556,14 @@ describe('Authentication API', () => {
         it('should disable MFA with valid code', async () => {
             const code = speakeasy.totp({
                 secret: mfaSecret,
-                encoding: 'base32'
+                encoding: 'base32',
             });
 
             const res = await request(app)
                 .post('/api/auth/disable-mfa')
                 .set('Authorization', `Bearer ${testToken}`)
                 .send({
-                    code: code
+                    code,
                 });
 
             expect(res.statusCode).toEqual(200);
@@ -578,7 +578,7 @@ describe('Authentication API', () => {
             const res = await request(app)
                 .post('/api/auth/disable-mfa')
                 .send({
-                    code: '123456'
+                    code: '123456',
                 });
 
             expect(res.statusCode).toEqual(401);
@@ -590,31 +590,31 @@ describe('Authentication API', () => {
             // Create a fresh user without MFA for this test
             const freshEmail = `jwt_test_${Date.now()}@example.com`;
             const freshUsername = `jwttest_${Date.now()}`;
-            
+
             await request(app)
                 .post('/api/auth/register')
                 .send({
                     username: freshUsername,
                     email: freshEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             const res = await request(app)
                 .post('/api/auth/login')
                 .send({
                     email: freshEmail,
-                    password: testPassword
+                    password: testPassword,
                 });
 
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('token');
             expect(res.body).not.toHaveProperty('requiresMFA');
-            
-            const token = res.body.token;
+
+            const { token } = res.body;
             expect(token).toBeTruthy();
-            
+
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret_key_change_in_production');
-            
+
             expect(decoded).toHaveProperty('id');
             expect(decoded).toHaveProperty('email', freshEmail);
             expect(decoded).toHaveProperty('username');
@@ -636,4 +636,3 @@ describe('Authentication API', () => {
         });
     });
 });
-

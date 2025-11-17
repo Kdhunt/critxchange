@@ -87,11 +87,11 @@ class AuthController {
                 const tempToken = jwt.sign(
                     { id: account.id, email: account.email, mfaRequired: true },
                     process.env.JWT_SECRET,
-                    { expiresIn: '10m' }
+                    { expiresIn: '10m' },
                 );
                 return res.json({
                     requiresMFA: true,
-                    tempToken
+                    tempToken,
                 });
             }
 
@@ -99,7 +99,7 @@ class AuthController {
             const token = jwt.sign(
                 { id: account.id, email: account.email, username: account.username },
                 process.env.JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '24h' },
             );
 
             res.json({
@@ -107,8 +107,8 @@ class AuthController {
                 user: {
                     id: account.id,
                     username: account.username,
-                    email: account.email
-                }
+                    email: account.email,
+                },
             });
         } catch (error) {
             console.error('Login error:', error);
@@ -141,8 +141,8 @@ class AuthController {
             // Check if user already exists
             const existingUser = await Account.findOne({
                 where: {
-                    [Op.or]: [{ email }, { username }]
-                }
+                    [Op.or]: [{ email }, { username }],
+                },
             });
 
             if (existingUser) {
@@ -161,14 +161,14 @@ class AuthController {
             const account = await Account.create({
                 username,
                 email,
-                password: hashedPassword
+                password: hashedPassword,
             });
 
             // Generate JWT token
             const token = jwt.sign(
                 { id: account.id, email: account.email, username: account.username },
                 process.env.JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '24h' },
             );
 
             res.status(201).json({
@@ -176,17 +176,17 @@ class AuthController {
                 user: {
                     id: account.id,
                     username: account.username,
-                    email: account.email
-                }
+                    email: account.email,
+                },
             });
         } catch (error) {
             console.error('Registration error:', error);
-            
+
             // Handle Sequelize unique constraint errors
             if (error.name === 'SequelizeUniqueConstraintError') {
                 return res.status(409).json({ error: 'Account with this email or username already exists' });
             }
-            
+
             res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -224,7 +224,7 @@ class AuthController {
                 secret: account.mfaSecret,
                 encoding: 'base32',
                 token: code,
-                window: 2
+                window: 2,
             });
 
             if (!isValid) {
@@ -235,7 +235,7 @@ class AuthController {
             const finalToken = jwt.sign(
                 { id: account.id, email: account.email, username: account.username },
                 process.env.JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '24h' },
             );
 
             res.json({
@@ -243,8 +243,8 @@ class AuthController {
                 user: {
                     id: account.id,
                     username: account.username,
-                    email: account.email
-                }
+                    email: account.email,
+                },
             });
         } catch (error) {
             console.error('MFA verification error:', error);
@@ -264,7 +264,7 @@ class AuthController {
             }
 
             const account = await Account.findOne({ where: { email } });
-            
+
             // Don't reveal if email exists (security best practice)
             if (!account) {
                 return res.json({ message: 'If that email exists, a password reset link has been sent' });
@@ -276,13 +276,13 @@ class AuthController {
 
             await account.update({
                 passwordResetToken: resetToken,
-                passwordResetExpires: resetExpires
+                passwordResetExpires: resetExpires,
             });
 
             // Send email (if configured)
             if (process.env.SMTP_USER && process.env.SMTP_PASS) {
                 const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password?token=${resetToken}`;
-                
+
                 try {
                     await transporter.sendMail({
                         from: process.env.SMTP_USER,
@@ -294,7 +294,7 @@ class AuthController {
                             <a href="${resetUrl}">${resetUrl}</a>
                             <p>This link will expire in 1 hour.</p>
                             <p>If you didn't request this, please ignore this email.</p>
-                        `
+                        `,
                     });
                 } catch (emailError) {
                     console.error('Email send error:', emailError);
@@ -332,9 +332,9 @@ class AuthController {
                 where: {
                     passwordResetToken: token,
                     passwordResetExpires: {
-                        [Op.gt]: new Date()
-                    }
-                }
+                        [Op.gt]: new Date(),
+                    },
+                },
             });
 
             if (!account) {
@@ -348,7 +348,7 @@ class AuthController {
             await account.update({
                 password: hashedPassword,
                 passwordResetToken: null,
-                passwordResetExpires: null
+                passwordResetExpires: null,
             });
 
             res.json({ message: 'Password reset successfully' });
@@ -373,7 +373,7 @@ class AuthController {
             // Generate secret
             const secret = speakeasy.generateSecret({
                 name: `CritXChange (${account.email})`,
-                issuer: 'CritXChange'
+                issuer: 'CritXChange',
             });
 
             // Generate QR code
@@ -381,12 +381,12 @@ class AuthController {
 
             // Save secret (but don't enable yet)
             await account.update({
-                mfaSecret: secret.base32
+                mfaSecret: secret.base32,
             });
 
             res.json({
                 secret: secret.base32,
-                qrCode: qrCodeUrl
+                qrCode: qrCodeUrl,
             });
         } catch (error) {
             console.error('MFA setup error:', error);
@@ -416,7 +416,7 @@ class AuthController {
                 secret: account.mfaSecret,
                 encoding: 'base32',
                 token: code,
-                window: 2
+                window: 2,
             });
 
             if (!isValid) {
@@ -425,7 +425,7 @@ class AuthController {
 
             // Enable MFA
             await account.update({
-                mfaEnabled: true
+                mfaEnabled: true,
             });
 
             res.json({ message: 'MFA enabled successfully' });
@@ -457,7 +457,7 @@ class AuthController {
                 secret: account.mfaSecret,
                 encoding: 'base32',
                 token: code,
-                window: 2
+                window: 2,
             });
 
             if (!isValid) {
@@ -467,7 +467,7 @@ class AuthController {
             // Disable MFA
             await account.update({
                 mfaEnabled: false,
-                mfaSecret: null
+                mfaSecret: null,
             });
 
             res.json({ message: 'MFA disabled successfully' });
@@ -493,16 +493,16 @@ class AuthController {
     static async handleOAuthCallback(req, res) {
         try {
             const account = req.user;
-            
+
             // Check if MFA is enabled
             if (account.mfaEnabled) {
                 // Generate temporary token for MFA verification
                 const tempToken = jwt.sign(
                     { id: account.id, email: account.email, mfaRequired: true },
                     process.env.JWT_SECRET,
-                    { expiresIn: '10m' }
+                    { expiresIn: '10m' },
                 );
-                
+
                 // Store temp token in session and redirect to MFA verification
                 req.session.tempToken = tempToken;
                 return res.redirect('/auth/verify-mfa');
@@ -512,12 +512,12 @@ class AuthController {
             const token = jwt.sign(
                 { id: account.id, email: account.email, username: account.username },
                 process.env.JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '24h' },
             );
 
             // Store token in session and redirect to dashboard
             req.session.token = token;
-            res.redirect('/dashboard?token=' + encodeURIComponent(token));
+            res.redirect(`/dashboard?token=${  encodeURIComponent(token)}`);
         } catch (error) {
             console.error('OAuth callback error:', error);
             res.redirect('/auth/login?error=oauth_failed');
@@ -531,11 +531,10 @@ class AuthController {
         if (!req.session.tempToken) {
             return res.redirect('/auth/login');
         }
-        res.render('auth/verify-mfa', { 
-            title: 'Verify MFA'
+        res.render('auth/verify-mfa', {
+            title: 'Verify MFA',
         });
     }
 }
 
 module.exports = AuthController;
-

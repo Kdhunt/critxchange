@@ -27,10 +27,10 @@ const optionalAuth = async (req, res, next) => {
             try {
                 // Verify token
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                
+
                 // Fetch user from database
                 const account = await Account.findByPk(decoded.id, {
-                    attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] }
+                    attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] },
                 });
 
                 if (account) {
@@ -40,7 +40,7 @@ const optionalAuth = async (req, res, next) => {
                 // Invalid token - that's okay, just continue without user
             }
         }
-        
+
         next();
     } catch (error) {
         // Error getting user - that's okay, just continue without user
@@ -49,4 +49,3 @@ const optionalAuth = async (req, res, next) => {
 };
 
 module.exports = optionalAuth;
-

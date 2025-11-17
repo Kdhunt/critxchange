@@ -17,4 +17,3 @@ if (process.env.SUPPRESS_TEST_LOGS === 'true') {
         error: jest.fn(),
     };
 }
-

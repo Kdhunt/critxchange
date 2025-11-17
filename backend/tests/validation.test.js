@@ -17,7 +17,7 @@ describe('Input Validation', () => {
                 'test@example.com',
                 'user.name@example.com',
                 'user+tag@example.co.uk',
-                'user123@example-domain.com'
+                'user123@example-domain.com',
             ];
 
             for (const email of validEmails) {
@@ -25,8 +25,8 @@ describe('Input Validation', () => {
                     .post('/api/auth/register')
                     .send({
                         username: `user_${Date.now()}_${Math.random()}`,
-                        email: email,
-                        password: 'ValidPass123!'
+                        email,
+                        password: 'ValidPass123!',
                     });
 
                 // Should not fail due to email format
@@ -42,7 +42,7 @@ describe('Input Validation', () => {
                 'user@.com',
                 'user space@example.com',
                 'user@example',
-                ''
+                '',
             ];
 
             for (const email of invalidEmails) {
@@ -50,8 +50,8 @@ describe('Input Validation', () => {
                     .post('/api/auth/register')
                     .send({
                         username: `user_${Date.now()}_${Math.random()}`,
-                        email: email,
-                        password: 'ValidPass123!'
+                        email,
+                        password: 'ValidPass123!',
                     });
 
                 expect(res.statusCode).toEqual(400);
@@ -69,7 +69,7 @@ describe('Input Validation', () => {
                     .send({
                         username: `user_${Date.now()}_${Math.random()}`,
                         email: `test_${Date.now()}@example.com`,
-                        password: password
+                        password,
                     });
 
                 expect(res.statusCode).toEqual(400);
@@ -86,7 +86,7 @@ describe('Input Validation', () => {
                     .send({
                         username: `user_${Date.now()}_${Math.random()}`,
                         email: `test_${Date.now()}@example.com`,
-                        password: password
+                        password,
                     });
 
                 // Should not fail due to password length
@@ -101,16 +101,16 @@ describe('Input Validation', () => {
                 'user123',
                 'user_name',
                 'User123',
-                'a'.repeat(50) // Long but valid
+                'a'.repeat(50), // Long but valid
             ];
 
             for (const username of validUsernames) {
                 const res = await request(app)
                     .post('/api/auth/register')
                     .send({
-                        username: username,
+                        username,
                         email: `test_${Date.now()}@example.com`,
-                        password: 'ValidPass123!'
+                        password: 'ValidPass123!',
                     });
 
                 // Should not fail due to username format
@@ -125,7 +125,7 @@ describe('Input Validation', () => {
                 { username: 'test', email: 'test@example.com' }, // missing password
                 { username: 'test', password: 'password123' }, // missing email
                 { email: 'test@example.com', password: 'password123' }, // missing username
-                {} // missing all
+                {}, // missing all
             ];
 
             for (const testCase of testCases) {
@@ -142,7 +142,7 @@ describe('Input Validation', () => {
             const testCases = [
                 { email: 'test@example.com' }, // missing password
                 { password: 'password123' }, // missing email
-                {} // missing all
+                {}, // missing all
             ];
 
             for (const testCase of testCases) {
@@ -166,7 +166,7 @@ describe('Input Validation', () => {
                     .post('/api/auth/verify-mfa')
                     .send({
                         token: 'test-token',
-                        code: code
+                        code,
                     });
 
                 // Should not fail due to code format (will fail on verification)
@@ -175,4 +175,3 @@ describe('Input Validation', () => {
         });
     });
 });
-
