@@ -305,8 +305,10 @@
             }
             
             const handleRegistration = async () => {
+                console.log('handleRegistration called');
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData);
+                console.log('Form data:', { username: data.username, email: data.email, hasPassword: !!data.password });
                 
                 // Clear previous errors
                 document.querySelectorAll('.form-error').forEach(el => {
