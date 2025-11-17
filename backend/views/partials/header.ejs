@@ -1,9 +1,30 @@
-<header>
-    <h1>My Website</h1>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+<header class="site-header">
+    <div class="header-container">
+        <div class="logo">
+            <a href="/" class="logo-link">
+                <span class="logo-text">CritXChange</span>
+            </a>
+        </div>
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link <%= typeof title !== 'undefined' && (title === 'Home' || title === 'Home Page') ? 'active' : '' %>">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about" class="nav-link <%= typeof title !== 'undefined' && (title === 'About' || title === 'About Page') ? 'active' : '' %>">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/api/auth/login" class="nav-link nav-link-button">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/api/auth/register" class="nav-link nav-link-button-primary">Sign Up</a>
+                </li>
+            </ul>
+        </nav>
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
 </header>

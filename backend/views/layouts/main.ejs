@@ -1,14 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= typeof description !== 'undefined' ? description : 'CritXChange - Your platform for critical exchanges and connections' %>">
+    <title><%= typeof title !== 'undefined' ? title + ' - CritXChange' : 'CritXChange' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <% if (typeof additionalStyles !== 'undefined') { %>
+        <%- additionalStyles %>
+    <% } %>
 </head>
 <body>
-<%- include('../partials/header') %>
-<main>
-    <%- body %>
-</main>
-<%- include('../partials/footer') %>
+    <%- include('../partials/header', typeof title !== 'undefined' ? { title: title } : {}) %>
+    
+    <main class="main-content">
+        <% if (typeof bodyComponent !== 'undefined') { %>
+            <%- include('../components/' + bodyComponent) %>
+        <% } else if (typeof body !== 'undefined') { %>
+            <%- body %>
+        <% } %>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const nav = document.querySelector('.main-nav');
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    nav.classList.toggle('nav-open');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+    
+    <% if (typeof additionalScripts !== 'undefined') { %>
+        <%- additionalScripts %>
+    <% } %>
 </body>
 </html>
