@@ -136,16 +136,6 @@
             
             const codeInput = document.getElementById('mfaCode');
             
-            // Auto-submit when 6 digits are entered
-            if (codeInput) {
-                codeInput.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, ''); // Only numbers
-                    if (e.target.value.length === 6) {
-                        form.dispatchEvent(new Event('submit'));
-                    }
-                });
-            }
-            
             const submitBtn = document.getElementById('submitBtn');
             
             const handleVerifyMFA = async () => {
