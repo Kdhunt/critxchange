@@ -305,13 +305,13 @@
                 
                 // Client-side validation
                 if (data.password !== data.confirmPassword) {
-                const errorMsg = 'Passwords do not match';
-                showToast(errorMsg, 'error');
-                document.getElementById('confirmPasswordError').textContent = errorMsg;
-                document.getElementById('confirmPasswordError').classList.add('show');
-                return;
-            }
-            
+                    const errorMsg = 'Passwords do not match';
+                    showToast(errorMsg, 'error');
+                    document.getElementById('confirmPasswordError').textContent = errorMsg;
+                    document.getElementById('confirmPasswordError').classList.add('show');
+                    return;
+                }
+                
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Creating Account...';

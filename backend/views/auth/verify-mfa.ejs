@@ -156,75 +156,75 @@
                 const submitBtn = document.getElementById('submitBtn');
                 
                 if (code.length !== 6) {
-                const errorMsg = 'Please enter a 6-digit code';
-                showToast(errorMsg, 'error');
-                mfaError.textContent = errorMsg;
-                mfaError.classList.add('show');
-                return;
-            }
-            
-            mfaError.classList.remove('show');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Verifying...';
-            
-            try {
-                // Get temp token from session
-                const tokenResponse = await fetch('/auth/temp-token');
-                if (!tokenResponse.ok) {
-                    const errorMsg = 'Session expired. Please login again.';
+                    const errorMsg = 'Please enter a 6-digit code';
                     showToast(errorMsg, 'error');
                     mfaError.textContent = errorMsg;
                     mfaError.classList.add('show');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Verify';
                     return;
                 }
                 
-                const { token: tempToken } = await tokenResponse.json();
+                mfaError.classList.remove('show');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Verifying...';
                 
-                // Verify MFA code
-                const response = await fetch('/api/auth/verify-mfa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        token: tempToken,
-                        code: code
-                    })
-                });
-                
-                const result = await response.json().catch(() => {
-                    throw new Error('Invalid response from server');
-                });
-                
-                if (response.ok && result.token) {
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
+                try {
+                    // Get temp token from session
+                    const tokenResponse = await fetch('/auth/temp-token');
+                    if (!tokenResponse.ok) {
+                        const errorMsg = 'Session expired. Please login again.';
+                        showToast(errorMsg, 'error');
+                        mfaError.textContent = errorMsg;
+                        mfaError.classList.add('show');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Verify';
+                        return;
+                    }
                     
-                    // Set cookie for server-side access
-                    document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                    const { token: tempToken } = await tokenResponse.json();
                     
-                    showToast('Verification successful! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 500);
-                } else {
-                    const errorMsg = result.error || 'Invalid code. Please try again.';
+                    // Verify MFA code
+                    const response = await fetch('/api/auth/verify-mfa', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: tempToken,
+                            code: code
+                        })
+                    });
+                    
+                    const result = await response.json().catch(() => {
+                        throw new Error('Invalid response from server');
+                    });
+                    
+                    if (response.ok && result.token) {
+                        localStorage.setItem('token', result.token);
+                        localStorage.setItem('user', JSON.stringify(result.user));
+                        
+                        // Set cookie for server-side access
+                        document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                        
+                        showToast('Verification successful! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 500);
+                    } else {
+                        const errorMsg = result.error || 'Invalid code. Please try again.';
+                        showToast(errorMsg, 'error');
+                        mfaError.textContent = errorMsg;
+                        mfaError.classList.add('show');
+                        codeInput.value = '';
+                        codeInput.focus();
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Verify';
+                    }
+                } catch (error) {
+                    const errorMsg = error.message || 'An error occurred. Please try again.';
                     showToast(errorMsg, 'error');
                     mfaError.textContent = errorMsg;
                     mfaError.classList.add('show');
-                    codeInput.value = '';
-                    codeInput.focus();
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Verify';
                 }
-            } catch (error) {
-                const errorMsg = error.message || 'An error occurred. Please try again.';
-                showToast(errorMsg, 'error');
-                mfaError.textContent = errorMsg;
-                mfaError.classList.add('show');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Verify';
-            }
                 return false;
             }, true); // Use capture phase
         });
