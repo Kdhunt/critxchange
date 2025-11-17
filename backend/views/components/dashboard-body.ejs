@@ -1,0 +1,97 @@
+<section class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Welcome, <%= typeof user !== 'undefined' && user.username ? user.username : 'User' %>!</h1>
+            <p class="dashboard-subtitle">Manage your account and settings</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <h3 class="card-title">Profile</h3>
+                <p class="card-description">View and edit your profile information</p>
+                <a href="/api/accounts/me" class="card-link">View Profile →</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3 class="card-title">Security</h3>
+                <p class="card-description">Manage your security settings</p>
+                <div class="card-status">
+                    <% if (typeof user !== 'undefined' && user.mfaEnabled) { %>
+                        <span class="status-badge status-enabled">MFA Enabled</span>
+                    <% } else { %>
+                        <span class="status-badge status-disabled">MFA Disabled</span>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <h3 class="card-title">Account Settings</h3>
+                <p class="card-description">Update your account preferences</p>
+                <a href="/api/accounts/me" class="card-link">Settings →</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                        <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"/>
+                        <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"/>
+                    </svg>
+                </div>
+                <h3 class="card-title">Activity</h3>
+                <p class="card-description">View your account activity</p>
+                <p class="card-meta">Coming soon</p>
+            </div>
+        </div>
+
+        <div class="dashboard-info">
+            <div class="info-card">
+                <h3>Account Information</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value"><%= typeof user !== 'undefined' ? user.email : 'N/A' %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Username:</span>
+                        <span class="info-value"><%= typeof user !== 'undefined' ? user.username : 'N/A' %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since:</span>
+                        <span class="info-value"><%= typeof user !== 'undefined' && user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">MFA Status:</span>
+                        <span class="info-value">
+                            <% if (typeof user !== 'undefined' && user.mfaEnabled) { %>
+                                <span class="status-badge status-enabled">Enabled</span>
+                            <% } else { %>
+                                <span class="status-badge status-disabled">Disabled</span>
+                            <% } %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

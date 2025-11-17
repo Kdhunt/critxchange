@@ -285,10 +285,14 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    // Store token and redirect
+                    // Store token and redirect to dashboard
                     localStorage.setItem('token', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
-                    window.location.href = '/';
+                    
+                    // Set cookie for server-side access
+                    document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                    
+                    window.location.href = '/dashboard';
                 } else {
                     // Show error
                     const errorField = result.error.toLowerCase().includes('email') ? 'emailError' :

@@ -173,7 +173,11 @@
                 if (response.ok) {
                     localStorage.setItem('token', result.token);
                     localStorage.setItem('user', JSON.stringify(result.user));
-                    window.location.href = '/';
+                    
+                    // Set cookie for server-side access
+                    document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
+                    
+                    window.location.href = '/dashboard';
                 } else {
                     mfaError.textContent = result.error || 'Invalid code. Please try again.';
                     mfaError.classList.add('show');

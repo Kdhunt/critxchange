@@ -453,9 +453,9 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
             { expiresIn: '24h' }
         );
 
-        // Store token in session and redirect
+        // Store token in session and redirect to dashboard
         req.session.token = token;
-        res.redirect('/?oauth=success');
+        res.redirect('/dashboard?token=' + encodeURIComponent(token));
     } catch (error) {
         console.error('OAuth callback error:', error);
         res.redirect('/auth/login?error=oauth_failed');

@@ -11,7 +11,7 @@
     <% } %>
 </head>
 <body>
-    <%- include('../partials/header', typeof title !== 'undefined' ? { title: title } : {}) %>
+    <%- include('../partials/header', typeof title !== 'undefined' ? { title: title, user: typeof user !== 'undefined' ? user : null } : { user: typeof user !== 'undefined' ? user : null }) %>
     
     <main class="main-content">
         <% if (typeof bodyComponent !== 'undefined') { %>
@@ -33,6 +33,36 @@
                 mobileMenuToggle.addEventListener('click', function() {
                     nav.classList.toggle('nav-open');
                     mobileMenuToggle.classList.toggle('active');
+                });
+            }
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    try {
+                        await fetch('/api/dashboard/logout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        
+                        // Clear localStorage
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        
+                        // Clear cookie
+                        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                        
+                        // Redirect to home
+                        window.location.href = '/';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        // Still redirect even if API call fails
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                        window.location.href = '/';
+                    }
                 });
             }
         });

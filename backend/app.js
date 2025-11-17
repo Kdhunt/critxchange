@@ -7,6 +7,9 @@ const path = require('path');
 const apiRoutes = require('./routes/api');
 const accountRoutes = require('./routes/account');
 const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard');
+const requireAuth = require('./middleware/viewAuth');
+const cookieParser = require('cookie-parser');
 
 // Initialize passport config
 require('./config/passport');
@@ -17,6 +20,7 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Session configuration
 app.use(session({
@@ -36,6 +40,7 @@ app.use(passport.session());
 // Import and use routes
 app.use('/auth', authRoutes); // Auth pages (login, register, etc.)
 app.use('/api/auth', authRoutes); // Auth API endpoints
+app.use('/api/dashboard', dashboardRoutes); // Dashboard routes
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
 
@@ -46,9 +51,39 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     try {
-        res.render('index', { title: 'Home Page' });
+        // Try to get user if logged in (optional - don't require auth for home)
+        let user = null;
+        try {
+            const requireAuth = require('./middleware/viewAuth');
+            // Check for token but don't redirect if missing
+            let token = null;
+            if (req.cookies && req.cookies.token) {
+                token = req.cookies.token;
+            } else if (req.session && req.session.token) {
+                token = req.session.token;
+            } else if (req.query.token) {
+                token = req.query.token;
+            }
+            
+            if (token) {
+                const jwt = require('jsonwebtoken');
+                const { Account } = require('./models');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                user = await Account.findByPk(decoded.id, {
+                    attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] }
+                });
+            }
+        } catch (err) {
+            // Not logged in or invalid token - that's okay for home page
+            user = null;
+        }
+        
+        res.render('index', { 
+            title: 'Home',
+            user: user
+        });
     } catch (err) {
         console.error('Error rendering home page:', err);
         res.status(500).send('Internal Server Error');
@@ -58,6 +93,19 @@ app.get('/', (req, res) => {
 
 app.get('/about', (req, res) => {
     res.render('about', { title: 'About Page' });
+});
+
+// Dashboard route (protected)
+app.get('/dashboard', requireAuth, async (req, res) => {
+    try {
+        res.render('dashboard', { 
+            title: 'Dashboard',
+            user: req.user
+        });
+    } catch (err) {
+        console.error('Error rendering dashboard:', err);
+        res.redirect('/auth/login?error=dashboard_error');
+    }
 });
 
 // 404 handler for undefined routes
