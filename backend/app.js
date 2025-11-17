@@ -9,6 +9,7 @@ const accountRoutes = require('./routes/account');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const requireAuth = require('./middleware/viewAuth');
+const optionalAuth = require('./middleware/optionalAuth');
 const cookieParser = require('cookie-parser');
 
 // Initialize passport config
@@ -51,38 +52,11 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', async (req, res) => {
+app.get('/', optionalAuth, (req, res) => {
     try {
-        // Try to get user if logged in (optional - don't require auth for home)
-        let user = null;
-        try {
-            const requireAuth = require('./middleware/viewAuth');
-            // Check for token but don't redirect if missing
-            let token = null;
-            if (req.cookies && req.cookies.token) {
-                token = req.cookies.token;
-            } else if (req.session && req.session.token) {
-                token = req.session.token;
-            } else if (req.query.token) {
-                token = req.query.token;
-            }
-            
-            if (token) {
-                const jwt = require('jsonwebtoken');
-                const { Account } = require('./models');
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                user = await Account.findByPk(decoded.id, {
-                    attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] }
-                });
-            }
-        } catch (err) {
-            // Not logged in or invalid token - that's okay for home page
-            user = null;
-        }
-        
         res.render('index', { 
             title: 'Home',
-            user: user
+            user: req.user || null
         });
     } catch (err) {
         console.error('Error rendering home page:', err);
@@ -91,8 +65,11 @@ app.get('/', async (req, res) => {
 });
 
 
-app.get('/about', (req, res) => {
-    res.render('about', { title: 'About Page' });
+app.get('/about', optionalAuth, (req, res) => {
+    res.render('about', { 
+        title: 'About',
+        user: req.user || null
+    });
 });
 
 // Dashboard route (protected)
