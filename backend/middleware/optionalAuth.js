@@ -11,16 +11,16 @@ const optionalAuth = async (req, res, next) => {
         let token = null;
 
         // Check for token in cookie
-        if (req.cookies && req.cookies.token) {
-            token = req.cookies.token;
+        if (req.cookies?.token) {
+            ({ token } = req.cookies);
         }
         // Check for token in session
-        else if (req.session && req.session.token) {
-            token = req.session.token;
+        else if (req.session?.token) {
+            ({ token } = req.session);
         }
         // Check for token in query
-        else if (req.query.token) {
-            token = req.query.token;
+        else if (req.query?.token) {
+            ({ token } = req.query);
         }
 
         if (token) {
