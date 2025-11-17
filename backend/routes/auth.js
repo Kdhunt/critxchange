@@ -24,12 +24,20 @@ router.post('/enable-mfa', authenticateJWT, AuthController.enableMFA);
 router.post('/disable-mfa', authenticateJWT, AuthController.disableMFA);
 
 // OAuth routes
-router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email'],
-}));
+router.get('/google', (req, res, next) => {
+    // Check if Google OAuth is configured
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return res.redirect('/auth/login?error=oauth_not_configured');
+    }
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+    })(req, res, next);
+});
 
 router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' }),
+    (req, res, next) => {
+        passport.authenticate('google', { failureRedirect: '/auth/login?error=oauth_failed' })(req, res, next);
+    },
     AuthController.handleOAuthCallback,
 );
 

@@ -8,6 +8,7 @@ const ERROR_MESSAGES = {
     session_expired: 'Your session has expired. Please login again.',
     account_not_found: 'Account not found. Please try again.',
     oauth_failed: 'OAuth authentication failed. Please try again.',
+    oauth_not_configured: 'Google OAuth is not configured. Please use email/password login.',
     dashboard_error: 'Error loading dashboard. Please try again.',
 };
 

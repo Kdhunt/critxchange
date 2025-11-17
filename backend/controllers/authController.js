@@ -492,6 +492,11 @@ class AuthController {
      */
     static async handleOAuthCallback(req, res) {
         try {
+            // Check if authentication failed
+            if (!req.user) {
+                return res.redirect('/auth/login?error=oauth_failed');
+            }
+
             const account = req.user;
 
             // Check if MFA is enabled
@@ -515,9 +520,18 @@ class AuthController {
                 { expiresIn: '24h' },
             );
 
-            // Store token in session and redirect to dashboard
+            // Store token in session and cookie
             req.session.token = token;
-            res.redirect(`/dashboard?token=${  encodeURIComponent(token)}`);
+            res.cookie('token', token, {
+                httpOnly: false, // Allow client-side access
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+            });
+
+            // Redirect to dashboard with token in query (for immediate auth)
+            res.redirect(`/dashboard?token=${encodeURIComponent(token)}`);
         } catch (error) {
             console.error('OAuth callback error:', error);
             res.redirect('/auth/login?error=oauth_failed');
