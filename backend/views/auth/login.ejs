@@ -350,6 +350,9 @@
                 return;
             }
             
+            // Prevent any form submission
+            form.setAttribute('novalidate', 'novalidate');
+            
             const mfaGroup = document.getElementById('mfaGroup');
             let requiresMFA = false;
             let tempToken = null;
@@ -357,6 +360,7 @@
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
                 
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData);
