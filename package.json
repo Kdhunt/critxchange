@@ -8,6 +8,7 @@
     "dev": "nodemon backend/index.js",
     "test": "jest",
     "test:auth": "node scripts/test-auth.js",
+    "test:mfa": "node scripts/test-mfa-flow.js",
     "frontend": "vite --config frontend/vite.config.js",
     "migrate": "node scripts/run-migrations.js"
   },
