@@ -1,84 +1,135 @@
 /**
  * Registration Form Handler
  * Handles user registration form submission
+ * Uses modern ES6+ practices: destructuring, optional chaining, nullish coalescing
  */
+
+const MIN_USERNAME_LENGTH = 3;
+const MIN_PASSWORD_LENGTH = 6;
+const STRONG_PASSWORD_LENGTH = 8;
+
+/**
+ * Validates password strength
+ * @param {string} password - The password to validate
+ * @returns {string} - 'weak', 'medium', or 'strong'
+ */
+const getPasswordStrength = (password) => {
+    if (!password) return 'weak';
+    if (password.length >= STRONG_PASSWORD_LENGTH
+        && /[A-Z]/.test(password)
+        && /[a-z]/.test(password)
+        && /[0-9]/.test(password)) {
+        return 'strong';
+    }
+    if (password.length >= MIN_PASSWORD_LENGTH) {
+        return 'medium';
+    }
+    return 'weak';
+};
+
+/**
+ * Validates email format
+ * @param {string} email - The email to validate
+ * @returns {boolean} - True if valid
+ */
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+/**
+ * Clears all form errors
+ */
+const clearFormErrors = () => {
+    document.querySelectorAll('.form-error').forEach((el) => {
+        el.classList.remove('show');
+        el.textContent = '';
+    });
+};
+
+/**
+ * Shows an error message for a specific field
+ * @param {string} fieldId - The ID of the error field
+ * @param {string} message - The error message
+ */
+const showFieldError = (fieldId, message) => {
+    const errorField = document.getElementById(fieldId);
+    if (errorField) {
+        errorField.textContent = message;
+        errorField.classList.add('show');
+    }
+    showToast(message, 'error');
+};
+
+/**
+ * Stores authentication data
+ * @param {string} token - The JWT token
+ * @param {Object} user - The user object
+ */
+const storeAuthData = (token, user) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    document.cookie = `token=${token}; path=/; max-age=${24 * 60 * 60}`;
+};
+
+/**
+ * Redirects to a URL after a delay
+ * @param {string} url - The URL to redirect to
+ * @param {number} delay - Delay in milliseconds
+ */
+const redirectAfterDelay = (url, delay = 500) => {
+    setTimeout(() => {
+        window.location.href = url;
+    }, delay);
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
-    if (!form) {
-        console.error('Register form not found');
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('passwordStrength');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (!form || !submitBtn) {
+        console.error('Required form elements not found');
         return;
     }
 
     // Prevent any form submission
     form.setAttribute('novalidate', 'novalidate');
 
-    const passwordInput = document.getElementById('password');
-    const strengthBar = document.getElementById('passwordStrength');
-
     // Password strength indicator
     if (passwordInput && strengthBar) {
-        passwordInput.addEventListener('input', (e) => {
-            const password = e.target.value;
-            let strength = 'weak';
-
-            if (password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password)) {
-                strength = 'strong';
-            } else if (password.length >= 6) {
-                strength = 'medium';
-            }
-
+        passwordInput.addEventListener('input', ({ target }) => {
+            const strength = getPasswordStrength(target.value);
             strengthBar.className = `password-strength-bar password-strength-${strength}`;
         });
     }
 
-    // Handle button click instead of form submission
-    const submitBtn = document.getElementById('submitBtn');
-    if (!submitBtn) {
-        console.error('Submit button not found');
-        return;
-    }
-
+    /**
+     * Handles registration form submission
+     */
     const handleRegistration = async () => {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
+        const { username, email, password, confirmPassword } = data;
 
-        // Clear previous errors
-        document.querySelectorAll('.form-error').forEach(el => {
-            el.classList.remove('show');
-            el.textContent = '';
-        });
+        clearFormErrors();
 
         // Client-side validation
-        if (!data.username || data.username.length < 3) {
-            const errorMsg = 'Username must be at least 3 characters';
-            showToast(errorMsg, 'error');
-            document.getElementById('usernameError').textContent = errorMsg;
-            document.getElementById('usernameError').classList.add('show');
+        if (!username || username.length < MIN_USERNAME_LENGTH) {
+            showFieldError('usernameError', 'Username must be at least 3 characters');
             return;
         }
 
-        if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            const errorMsg = 'Please enter a valid email address';
-            showToast(errorMsg, 'error');
-            document.getElementById('emailError').textContent = errorMsg;
-            document.getElementById('emailError').classList.add('show');
+        if (!email || !isValidEmail(email)) {
+            showFieldError('emailError', 'Please enter a valid email address');
             return;
         }
 
-        if (!data.password || data.password.length < 6) {
-            const errorMsg = 'Password must be at least 6 characters';
-            showToast(errorMsg, 'error');
-            document.getElementById('passwordError').textContent = errorMsg;
-            document.getElementById('passwordError').classList.add('show');
+        if (!password || password.length < MIN_PASSWORD_LENGTH) {
+            showFieldError('passwordError', 'Password must be at least 6 characters');
             return;
         }
 
-        if (data.password !== data.confirmPassword) {
-            const errorMsg = 'Passwords do not match';
-            showToast(errorMsg, 'error');
-            document.getElementById('confirmPasswordError').textContent = errorMsg;
-            document.getElementById('confirmPasswordError').classList.add('show');
+        if (password !== confirmPassword) {
+            showFieldError('confirmPasswordError', 'Passwords do not match');
             return;
         }
 
@@ -89,11 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: data.username,
-                    email: data.email,
-                    password: data.password
-                })
+                body: JSON.stringify({ username, email, password }),
             });
 
             const result = await response.json().catch(() => {
@@ -101,69 +148,42 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok && result.token) {
-                // Store token and user info
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
-
-                // Set cookie for server-side access
-                document.cookie = `token=${result.token}; path=/; max-age=${24 * 60 * 60}`;
-
-                // Show success toast
+                storeAuthData(result.token, result.user);
                 showToast('Account created successfully! Redirecting...', 'success');
-
-                // Redirect to dashboard after brief delay
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 500);
+                redirectAfterDelay('/dashboard');
             } else {
-                // Show error
-                const errorMessage = result.error || 'Registration failed';
-                showToast(errorMessage, 'error');
-
-                const errorField = errorMessage.toLowerCase().includes('email') ? 'emailError' :
-                                 errorMessage.toLowerCase().includes('username') ? 'usernameError' :
-                                 'passwordError';
-                document.getElementById(errorField).textContent = errorMessage;
-                document.getElementById(errorField).classList.add('show');
-
+                const errorMessage = result.error ?? 'Registration failed';
+                const errorField = errorMessage.toLowerCase().includes('email') ? 'emailError'
+                    : errorMessage.toLowerCase().includes('username') ? 'usernameError'
+                        : 'passwordError';
+                showFieldError(errorField, errorMessage);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
             }
         } catch (error) {
             console.error('Registration error:', error);
-            const errorMessage = error.message || 'An error occurred. Please try again.';
-            showToast(errorMessage, 'error');
-            document.getElementById('emailError').textContent = errorMessage;
-            document.getElementById('emailError').classList.add('show');
+            const errorMessage = error.message ?? 'An error occurred. Please try again.';
+            showFieldError('emailError', errorMessage);
             submitBtn.disabled = false;
             submitBtn.textContent = 'Create Account';
         }
     };
 
-    // Attach click handler to button
-    try {
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            handleRegistration().catch((err) => {
-                console.error('Error in handleRegistration:', err);
-            });
+    // Attach event handlers
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        handleRegistration().catch((err) => {
+            console.error('Error in handleRegistration:', err);
         });
+    };
 
-        // Also handle Enter key in form fields
-        form.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !submitBtn.disabled) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                handleRegistration().catch((err) => {
-                    console.error('Error in handleRegistration:', err);
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error attaching event handlers:', error);
-    }
+    submitBtn.addEventListener('click', handleSubmit);
+
+    form.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !submitBtn.disabled) {
+            handleSubmit(e);
+        }
+    });
 });
-

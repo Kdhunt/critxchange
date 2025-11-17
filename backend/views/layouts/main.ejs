@@ -23,50 +23,7 @@
     
     <%- include('../partials/footer') %>
     
-    <script>
-        // Mobile menu toggle
-        document.addEventListener('DOMContentLoaded', () => {
-            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-            const nav = document.querySelector('.main-nav');
-            
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', () => {
-                    nav.classList.toggle('nav-open');
-                    mobileMenuToggle.classList.toggle('active');
-                });
-            }
-
-            // Logout functionality
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async () => {
-                    try {
-                        await fetch('/api/dashboard/logout', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        
-                        // Clear localStorage
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        
-                        // Clear cookie
-                        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-                        
-                        // Redirect to home
-                        window.location.href = '/';
-                    } catch (error) {
-                        console.error('Logout error:', error);
-                        // Still redirect even if API call fails
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-                        window.location.href = '/';
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="/js/main.js"></script>
     
     <% if (typeof additionalScripts !== 'undefined') { %>
         <%- additionalScripts %>

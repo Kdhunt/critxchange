@@ -1,39 +1,78 @@
 /**
  * Forgot Password Form Handler
  * Handles password reset request form submission
+ * Uses modern ES6+ practices: destructuring, optional chaining, nullish coalescing
  */
+
+/**
+ * Validates email format
+ * @param {string} email - The email to validate
+ * @returns {boolean} - True if valid
+ */
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+/**
+ * Clears form messages
+ * @param {HTMLElement} emailError - The email error element
+ * @param {HTMLElement} successMessage - The success message element
+ */
+const clearMessages = (emailError, successMessage) => {
+    emailError?.classList.remove('show');
+    successMessage?.classList.remove('show');
+};
+
+/**
+ * Shows an error message
+ * @param {HTMLElement} emailError - The email error element
+ * @param {string} message - The error message
+ */
+const showError = (emailError, message) => {
+    if (emailError) {
+        emailError.textContent = message;
+        emailError.classList.add('show');
+    }
+    showToast(message, 'error');
+};
+
+/**
+ * Shows a success message
+ * @param {HTMLElement} successMessage - The success message element
+ * @param {string} message - The success message
+ */
+const showSuccess = (successMessage, message) => {
+    if (successMessage) {
+        successMessage.textContent = message;
+        successMessage.classList.add('show');
+    }
+    showToast(message, 'success');
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('forgotPasswordForm');
-    if (!form) {
-        console.error('Forgot password form not found');
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
+    const successMessage = document.getElementById('successMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (!form || !submitBtn) {
+        console.error('Required form elements not found');
         return;
     }
 
     // Prevent any form submission
     form.setAttribute('novalidate', 'novalidate');
 
-    const submitBtn = document.getElementById('submitBtn');
-    if (!submitBtn) {
-        console.error('Submit button not found');
-        return;
-    }
-
+    /**
+     * Handles forgot password form submission
+     */
     const handleForgotPassword = async () => {
-        const email = document.getElementById('email').value;
-        const emailError = document.getElementById('emailError');
-        const successMessage = document.getElementById('successMessage');
+        const email = emailInput?.value ?? '';
 
-        // Clear previous messages
-        emailError.classList.remove('show');
-        successMessage.classList.remove('show');
+        clearMessages(emailError, successMessage);
 
         // Validation
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            const errorMsg = 'Please enter a valid email address';
-            showToast(errorMsg, 'error');
-            emailError.textContent = errorMsg;
-            emailError.classList.add('show');
+        if (!email || !isValidEmail(email)) {
+            showError(emailError, 'Please enter a valid email address');
             return;
         }
 
@@ -44,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/auth/forgot-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email }),
             });
 
             const result = await response.json().catch(() => {
@@ -53,45 +92,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const successMsg = 'Password reset link has been sent to your email.';
-                showToast(successMsg, 'success');
-                successMessage.textContent = successMsg;
-                successMessage.classList.add('show');
+                showSuccess(successMessage, successMsg);
                 form.reset();
             } else {
-                const errorMsg = result.error || 'An error occurred. Please try again.';
-                showToast(errorMsg, 'error');
-                emailError.textContent = errorMsg;
-                emailError.classList.add('show');
+                const errorMsg = result.error ?? 'An error occurred. Please try again.';
+                showError(emailError, errorMsg);
             }
         } catch (error) {
-            const errorMsg = error.message || 'An error occurred. Please try again.';
-            showToast(errorMsg, 'error');
-            emailError.textContent = errorMsg;
-            emailError.classList.add('show');
+            const errorMsg = error.message ?? 'An error occurred. Please try again.';
+            showError(emailError, errorMsg);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Send Reset Link';
         }
     };
 
-    submitBtn.addEventListener('click', (e) => {
+    // Attach event handlers
+    const handleSubmit = (e) => {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         handleForgotPassword().catch((err) => {
             console.error('Error in handleForgotPassword:', err);
         });
-    });
+    };
+
+    submitBtn.addEventListener('click', handleSubmit);
 
     form.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !submitBtn.disabled) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            handleForgotPassword().catch((err) => {
-                console.error('Error in handleForgotPassword:', err);
-            });
+            handleSubmit(e);
         }
     });
 });
-
