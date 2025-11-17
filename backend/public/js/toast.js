@@ -1,0 +1,59 @@
+/**
+ * Toast Notification System
+ * Provides toast notifications for user feedback
+ */
+
+const showToast = (message, type = 'error') => {
+    const container = document.getElementById('toastContainer');
+    if (!container) {
+        console.error('Toast container not found');
+        return;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icon = type === 'error' ? '❌' : '✅';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <div class="toast-content">
+            <div class="toast-title">${type === 'error' ? 'Error' : 'Success'}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close">×</button>
+    `;
+
+    // Add event listener to close button
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            toast.classList.add('hiding');
+            setTimeout(() => toast.remove(), 300);
+        });
+    }
+
+    container.appendChild(toast);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+};
+
+// Event delegation for toast close buttons (for dynamically created toasts)
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('toastContainer');
+    if (container) {
+        container.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toast-close')) {
+                const toast = e.target.closest('.toast');
+                if (toast) {
+                    toast.classList.add('hiding');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }
+        });
+    }
+});
+
