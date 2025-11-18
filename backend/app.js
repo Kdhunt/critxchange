@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const passport = require('passport');
 const path = require('path');
@@ -13,13 +14,32 @@ const DashboardController = require('./controllers/dashboardController');
 const requireAuth = require('./middleware/viewAuth');
 const optionalAuth = require('./middleware/optionalAuth');
 const cookieParser = require('cookie-parser');
+const validateEnv = require('./config/validateEnv');
 
 // Initialize passport config
 require('./config/passport');
 
-const app = express();
+validateEnv();
 
-app.use(cors());
+const app = express();
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+const defaultAllowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : defaultAllowedOrigins;
+
+const allowAllOrigins = process.env.CORS_ALLOW_ALL === 'true';
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (allowAllOrigins || !origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+}));
 
 // Configure Helmet with CSP that allows inline scripts and Google OAuth
 app.use(helmet({
@@ -59,8 +79,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Import and use routes
+const authRateLimiter = isTestEnv
+    ? (_req, _res, next) => next()
+    : rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        limit: 10,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: { error: 'Too many authentication attempts. Please try again later.' },
+    });
+
 app.use('/auth', authRoutes); // Auth pages (login, register, etc.)
-app.use('/api/auth', authRoutes); // Auth API endpoints
+app.use('/api/auth', authRateLimiter, authRoutes); // Auth API endpoints with rate limiting
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
@@ -90,6 +120,14 @@ app.get('/about', optionalAuth, PageController.renderAbout);
 
 // Dashboard route (protected)
 app.get('/dashboard', requireAuth, DashboardController.renderDashboard);
+
+// Specific handler for CORS rejections
+app.use((err, req, res, next) => {
+    if (err && err.message === 'Not allowed by CORS') {
+        return res.status(403).json({ error: 'Origin not allowed by CORS policy' });
+    }
+    return next(err);
+});
 
 // 404 handler for undefined routes
 app.use((req, res) => {
