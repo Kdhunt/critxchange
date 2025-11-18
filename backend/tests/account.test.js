@@ -124,7 +124,8 @@ describe('Account API', () => {
 
         const res = await request(app)
             .delete(`/api/accounts/${deleteUser.id}`)
-            .set('Authorization', `Bearer ${deleteToken}`);
+            .set('Authorization', `Bearer ${deleteToken}`)
+            .send({ currentPassword: 'password123' });
         expect(res.statusCode).toEqual(204);
     });
 

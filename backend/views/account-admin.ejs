@@ -1,0 +1,7 @@
+<%- include('layouts/main', {
+    title: 'Account Administration',
+    description: 'Manage your CritXChange account, security, and data privacy preferences',
+    bodyComponent: 'account-admin-body',
+    user: typeof user !== 'undefined' ? user : null,
+    additionalScripts: '<script src="/js/account-admin.js" defer></script>'
+}) %>
