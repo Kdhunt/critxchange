@@ -25,6 +25,7 @@ A modern, secure authentication platform with comprehensive features including r
 - Mobile-friendly navigation
 - Real-time form validation
 - Password strength indicators
+- Account administration center for managing profile, credentials, and account lifecycle events
 
 ## Quick Start
 

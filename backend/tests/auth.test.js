@@ -635,4 +635,111 @@ describe('Authentication API', () => {
             expect(res.statusCode).toEqual(401);
         });
     });
+
+    describe('Account administration endpoints', () => {
+        const adminEmail = `admin_${Date.now()}@example.com`;
+        const adminUsername = `adminuser_${Date.now()}`;
+        const adminPassword = 'AdminPass123!';
+        let adminToken = null;
+        let adminAccountId = null;
+
+        beforeAll(async () => {
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({
+                    username: adminUsername,
+                    email: adminEmail,
+                    password: adminPassword,
+                });
+
+            adminToken = res.body.token;
+            adminAccountId = res.body.user.id;
+        });
+
+        it('updates username and email for the authenticated account', async () => {
+            const newUsername = `${adminUsername}_updated`;
+            const newEmail = `updated_${adminEmail}`;
+
+            const res = await request(app)
+                .put(`/api/accounts/${adminAccountId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    username: newUsername,
+                    email: newEmail,
+                });
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body).toHaveProperty('username', newUsername);
+            expect(res.body).toHaveProperty('email', newEmail);
+        });
+
+        it('requires the current password when updating the password', async () => {
+            const resMissingPassword = await request(app)
+                .put(`/api/accounts/${adminAccountId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    password: 'NewSecret123!',
+                });
+
+            expect(resMissingPassword.statusCode).toEqual(400);
+
+            const resWrongPassword = await request(app)
+                .put(`/api/accounts/${adminAccountId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    password: 'NewSecret123!',
+                    currentPassword: 'not-correct',
+                });
+
+            expect(resWrongPassword.statusCode).toEqual(403);
+
+            const res = await request(app)
+                .put(`/api/accounts/${adminAccountId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    password: 'NewSecret123!',
+                    currentPassword: adminPassword,
+                });
+
+            expect(res.statusCode).toEqual(200);
+        });
+
+        it('requires password confirmation before deleting an account', async () => {
+            const deleteEmail = `delete_${Date.now()}@example.com`;
+            const deleteUsername = `delete_user_${Date.now()}`;
+            const deletePassword = 'DeleteMe123!';
+
+            const registerRes = await request(app)
+                .post('/api/auth/register')
+                .send({
+                    username: deleteUsername,
+                    email: deleteEmail,
+                    password: deletePassword,
+                });
+
+            const deleteToken = registerRes.body.token;
+            const deleteAccountId = registerRes.body.user.id;
+
+            const missingPasswordRes = await request(app)
+                .delete(`/api/accounts/${deleteAccountId}`)
+                .set('Authorization', `Bearer ${deleteToken}`)
+                .send();
+
+            expect(missingPasswordRes.statusCode).toEqual(400);
+
+            const wrongPasswordRes = await request(app)
+                .delete(`/api/accounts/${deleteAccountId}`)
+                .set('Authorization', `Bearer ${deleteToken}`)
+                .send({ currentPassword: 'wrong' });
+
+            expect(wrongPasswordRes.statusCode).toEqual(403);
+
+            const successRes = await request(app)
+                .delete(`/api/accounts/${deleteAccountId}`)
+                .set('Authorization', `Bearer ${deleteToken}`)
+                .send({ currentPassword: deletePassword });
+
+            expect(successRes.statusCode).toEqual(204);
+        });
+    });
 });

@@ -33,6 +33,22 @@ class PageController {
             res.status(500).send('Internal Server Error');
         }
     }
+
+    /**
+     * Render account administration page
+     */
+    static renderAccountAdministration(req, res) {
+        try {
+            res.render('account-admin', {
+                title: 'Account Administration',
+                description: 'Manage your CritXChange profile and security preferences',
+                user: req.user || null,
+            });
+        } catch (err) {
+            console.error('Error rendering account administration page:', err);
+            res.status(500).send('Internal Server Error');
+        }
+    }
 }
 
 module.exports = PageController;

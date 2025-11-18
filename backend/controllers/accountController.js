@@ -121,20 +121,38 @@ class AccountController {
                 return res.status(403).json({ error: 'You can only update your own account' });
             }
 
-            const { username, email, password } = req.body;
+            const { username, email, password, currentPassword } = req.body;
             const updateData = {};
+
+            if (username === undefined && email === undefined && password === undefined) {
+                return res.status(400).json({ error: 'Please provide at least one field to update' });
+            }
 
             // Only include fields that are provided
             if (username !== undefined) updateData.username = username;
             if (email !== undefined) updateData.email = email;
-            if (password !== undefined) {
-                updateData.password = await bcrypt.hash(password, 10);
-            }
 
             // Check if account exists
             const account = await Account.findByPk(accountId);
             if (!account) {
                 return res.status(404).json({ error: 'Account not found' });
+            }
+
+            if (password !== undefined) {
+                if (!currentPassword) {
+                    return res.status(400).json({ error: 'Current password is required to update your password' });
+                }
+
+                if (!account.password) {
+                    return res.status(400).json({ error: 'Password updates are not available for this account' });
+                }
+
+                const passwordMatches = await bcrypt.compare(currentPassword, account.password);
+                if (!passwordMatches) {
+                    return res.status(403).json({ error: 'Current password is incorrect' });
+                }
+
+                updateData.password = await bcrypt.hash(password, 10);
             }
 
             // Check for conflicts if updating username or email
@@ -187,6 +205,26 @@ class AccountController {
             // Users can only delete their own account (unless admin in future)
             if (req.user.id !== accountId) {
                 return res.status(403).json({ error: 'You can only delete your own account' });
+            }
+
+            const { currentPassword } = req.body || {};
+
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to delete your account' });
+            }
+
+            const account = await Account.findByPk(accountId);
+            if (!account) {
+                return res.status(404).json({ error: 'Account not found' });
+            }
+
+            if (!account.password) {
+                return res.status(400).json({ error: 'Password confirmation is required before deleting this account' });
+            }
+
+            const passwordMatches = await bcrypt.compare(currentPassword, account.password);
+            if (!passwordMatches) {
+                return res.status(403).json({ error: 'Current password is incorrect' });
             }
 
             const deleted = await Account.destroy({ where: { id: accountId } });

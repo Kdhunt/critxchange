@@ -117,6 +117,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Page routes
 app.get('/', optionalAuth, PageController.renderHome);
 app.get('/about', optionalAuth, PageController.renderAbout);
+app.get('/account', requireAuth, PageController.renderAccountAdministration);
 
 // Dashboard route (protected)
 app.get('/dashboard', requireAuth, DashboardController.renderDashboard);

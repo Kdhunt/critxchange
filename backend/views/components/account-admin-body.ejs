@@ -1,0 +1,135 @@
+<section class="account-admin">
+    <div class="container">
+        <div class="account-header">
+            <div>
+                <p class="eyebrow">Account Center</p>
+                <h1>Account administration</h1>
+                <p class="lead">Review your profile, update credentials, and manage lifecycle events from one secure location.</p>
+            </div>
+            <div class="account-meta">
+                <div>
+                    <span class="label">Member since</span>
+                    <strong><%= typeof user !== 'undefined' && user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %></strong>
+                </div>
+                <div>
+                    <span class="label">MFA status</span>
+                    <% if (typeof user !== 'undefined' && user?.mfaEnabled) { %>
+                        <strong class="status-badge status-enabled">Enabled</strong>
+                    <% } else { %>
+                        <strong class="status-badge status-disabled">Disabled</strong>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="account-grid">
+            <section class="account-panel" aria-labelledby="profileOverviewHeading">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Profile overview</p>
+                        <h2 id="profileOverviewHeading">Personal information</h2>
+                    </div>
+                    <span class="updated-at" id="accountUpdatedAt"></span>
+                </div>
+                <dl class="account-summary" id="accountSummary">
+                    <div>
+                        <dt>Username</dt>
+                        <dd><%= typeof user !== 'undefined' ? user?.username : 'N/A' %></dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd><%= typeof user !== 'undefined' ? user?.email : 'N/A' %></dd>
+                    </div>
+                    <div>
+                        <dt>Account ID</dt>
+                        <dd><%= typeof user !== 'undefined' ? user?.id : 'N/A' %></dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="account-panel" aria-labelledby="profileFormHeading">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Profile</p>
+                        <h2 id="profileFormHeading">Update username or email</h2>
+                    </div>
+                    <span class="panel-helper">Keep your contact information accurate</span>
+                </div>
+                <form id="profileForm" class="account-form" data-account-id="<%= typeof user !== 'undefined' ? user?.id : '' %>">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" value="<%= typeof user !== 'undefined' ? user?.username : '' %>" autocomplete="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" id="email" name="email" value="<%= typeof user !== 'undefined' ? user?.email : '' %>" autocomplete="email" required>
+                        </div>
+                    </div>
+                    <div class="form-footer">
+                        <p class="form-status" id="profileStatus" role="status" aria-live="polite"></p>
+                        <button type="submit" class="btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="account-panel" aria-labelledby="passwordFormHeading">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Security</p>
+                        <h2 id="passwordFormHeading">Update password</h2>
+                    </div>
+                    <span class="panel-helper">Strong passwords help protect your account</span>
+                </div>
+                <form id="passwordForm" class="account-form" data-account-id="<%= typeof user !== 'undefined' ? user?.id : '' %>">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="currentPassword">Current password</label>
+                            <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New password</label>
+                            <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm new password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required minlength="6">
+                        </div>
+                    </div>
+                    <ul class="helper-list">
+                        <li>Use at least 8 characters with a mix of letters, numbers, and symbols.</li>
+                        <li>Avoid reusing passwords from other sites.</li>
+                    </ul>
+                    <div class="form-footer">
+                        <p class="form-status" id="passwordStatus" role="status" aria-live="polite"></p>
+                        <button type="submit" class="btn-primary">Update password</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="account-panel danger" aria-labelledby="dangerZoneHeading">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Danger zone</p>
+                        <h2 id="dangerZoneHeading">Close or export your account</h2>
+                    </div>
+                </div>
+                <p class="panel-copy">Deleting your account removes all personal data associated with CritXChange. This action cannot be undone.</p>
+                <form id="deleteAccountForm" class="account-form" data-account-id="<%= typeof user !== 'undefined' ? user?.id : '' %>">
+                    <div class="form-group">
+                        <label for="deleteConfirm">Type DELETE to confirm</label>
+                        <input type="text" id="deleteConfirm" name="deleteConfirm" autocomplete="off" required placeholder="DELETE">
+                    </div>
+                    <div class="form-group">
+                        <label for="deletePassword">Confirm with password</label>
+                        <input type="password" id="deletePassword" name="deletePassword" autocomplete="current-password" required>
+                    </div>
+                    <div class="form-footer">
+                        <p class="form-status" id="deleteStatus" role="status" aria-live="polite"></p>
+                        <button type="submit" class="btn-danger">Delete account</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</section>
