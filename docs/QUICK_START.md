@@ -6,7 +6,7 @@ Get up and running with CritXChange in minutes!
 
 ### 1. Install Dependencies
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Create .env File
@@ -23,7 +23,7 @@ PORT=3000
 
 ### 3. Start Server
 ```bash
-npm start
+pnpm start
 ```
 
 ### 4. Test It!
@@ -37,10 +37,10 @@ npm start
 
 ```bash
 # Test all authentication features
-npm run test:auth
+pnpm run test:auth
 
 # Test MFA flow end-to-end
-npm run test:mfa
+pnpm run test:mfa
 ```
 
 ## 📚 Next Steps
@@ -84,17 +84,17 @@ See [docs/PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) for deployment gui
 
 ```bash
 # Development
-npm run dev          # Start with auto-reload
+pnpm dev             # Start with auto-reload
 
 # Testing
-npm run test:auth    # Run authentication tests
-npm run test:mfa     # Test MFA flow
+pnpm run test:auth   # Run authentication tests
+pnpm run test:mfa    # Test MFA flow
 
 # Database
-npm run migrate      # Run database migrations
+pnpm run migrate     # Run database migrations
 
 # Production
-npm start            # Start production server
+pnpm start           # Start production server
 ```
 
 Happy coding! 🎉

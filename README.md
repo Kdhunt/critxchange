@@ -30,8 +30,8 @@ A modern, secure authentication platform with comprehensive features including r
 ## Quick Start
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js (v18 or higher)
+- pnpm (v9 or higher)
 - (Optional) PostgreSQL for production
 - (Optional) Google OAuth credentials
 - (Optional) SMTP server for email
@@ -46,7 +46,7 @@ A modern, secure authentication platform with comprehensive features including r
 
 2. **Install dependencies**
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Configure environment variables**
@@ -57,9 +57,9 @@ A modern, secure authentication platform with comprehensive features including r
 
 4. **Start the server**
    ```bash
-   npm start
+   pnpm start
    # or for development with auto-reload:
-   npm run dev
+   pnpm dev
    ```
 
 5. **Access the application**
@@ -150,7 +150,7 @@ See [SETUP.md](SETUP.md) for detailed configuration instructions.
 Run the comprehensive test suite:
 
 ```bash
-npm test
+pnpm test
 ```
 
 Or run the authentication tests specifically:
@@ -199,7 +199,7 @@ critxchange-1/
 ### Running in Development Mode
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 This uses `nodemon` for automatic server restarts on file changes.
@@ -209,7 +209,7 @@ This uses `nodemon` for automatic server restarts on file changes.
 In development, the database auto-syncs. For production:
 
 ```bash
-npm run migrate
+pnpm run migrate
 ```
 
 ### Code Quality
@@ -236,7 +236,7 @@ npm run migrate
 
 1. Set `NODE_ENV=production`
 2. Configure production database
-3. Run migrations: `npm run migrate`
+3. Run migrations: `pnpm run migrate`
 4. Set strong secrets for JWT and sessions
 5. Configure CORS and security headers
 6. Set up HTTPS

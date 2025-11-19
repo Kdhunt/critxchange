@@ -4,7 +4,7 @@
 
 1. **Install Dependencies**
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Configure Environment Variables**
@@ -34,13 +34,13 @@
    
    The app uses SQLite in-memory database by default in development. For production:
    - Set `DATABASE_URL` or configure `DB_*` environment variables
-   - Run migrations: `npm run migrate`
+   - Run migrations: `pnpm run migrate`
 
 4. **Start the Server**
    ```bash
-   npm start
+   pnpm start
    # or for development with auto-reload:
-   npm run dev
+   pnpm dev
    ```
 
 ## Google OAuth Setup
@@ -122,14 +122,14 @@ Update `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASS` in `.env`
 
 - Database auto-syncs in development mode
 - Password reset tokens are logged to console in dev mode (if SMTP not configured)
-- Use `npm run dev` for auto-reload during development
+- Use `pnpm dev` for auto-reload during development
 - Check browser console for any JavaScript errors
 
 ## Production Deployment
 
 1. Set `NODE_ENV=production` in environment
 2. Use proper database (PostgreSQL recommended)
-3. Run migrations: `npm run migrate`
+3. Run migrations: `pnpm run migrate`
 4. Configure secure session storage
 5. Use HTTPS
 6. Set strong secrets for JWT_SECRET and SESSION_SECRET

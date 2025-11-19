@@ -89,9 +89,9 @@ GOOGLE_CALLBACK_URL=https://yourdomain.com/auth/google/callback
 ### 7. Restart Your Server
 
 ```bash
-npm start
+pnpm start
 # or
-npm run dev
+pnpm dev
 ```
 
 ### 8. Test OAuth
