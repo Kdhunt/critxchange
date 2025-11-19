@@ -490,7 +490,7 @@ class AuthController {
     /**
      * Handle OAuth callback (Google)
      */
-    static async handleOAuthCallback(req, res) {
+    static handleOAuthCallback(req, res) {
         try {
             // Check if authentication failed
             if (!req.user) {

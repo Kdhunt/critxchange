@@ -1,0 +1,74 @@
+<section class="profile-manager">
+    <div class="container">
+        <header class="profile-manager__hero">
+            <div>
+                <p class="eyebrow">Public presence</p>
+                <h1>Profile manager</h1>
+                <p class="lead">Curate your public CritXChange profile, advertise your services, and add a welcoming visual identity.</p>
+            </div>
+            <div class="profile-manager__cta">
+                <p class="label">Live profile</p>
+                <p class="profile-manager__url" id="profileUrl">Set a display name to generate your URL</p>
+            </div>
+        </header>
+
+        <section class="profile-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Profile basics</p>
+                    <h2>Display name & slug</h2>
+                </div>
+                <p class="panel-helper">Display names must be unique to avoid duplicate profile URLs.</p>
+            </div>
+            <form id="profileManagerForm" class="profile-form" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="displayName">Display name</label>
+                        <input type="text" id="displayName" name="displayName" autocomplete="off" maxlength="80" placeholder="Three Dragons in a Trenchcoat" required>
+                        <p class="helper-text">We recommend title casing and avoiding pen names used elsewhere on CritXChange.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileSlug">Profile URL</label>
+                        <input type="text" id="profileSlug" name="profileSlug" readonly>
+                        <p class="helper-text">Slug auto-updates as you type.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Introduction</label>
+                    <textarea id="bio" name="bio" rows="4" maxlength="1000" placeholder="Share how you help authors reach their goals."></textarea>
+                    <p class="helper-text" id="bioCount">0 / 1000</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Featured services</label>
+                    <div class="services-grid">
+                        <% (services || []).forEach((service, index) => { %>
+                            <label class="service-pill">
+                                <input type="checkbox" name="services" value="<%= service %>">
+                                <span><%= service %></span>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="avatar-upload">
+                    <div class="avatar-upload__preview">
+                        <img id="avatarPreview" alt="Profile preview" src="/images/profile-placeholder.svg">
+                    </div>
+                    <div class="avatar-upload__controls">
+                        <label for="avatar">Profile image</label>
+                        <input type="file" id="avatar" name="avatar" accept="image/*">
+                        <p class="helper-text">Square images at least 400px look best. Max size 2MB.</p>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <p class="form-status" id="profileManagerStatus" role="status" aria-live="polite"></p>
+                    <button type="submit" class="btn-primary">Publish profile</button>
+                </div>
+            </form>
+        </section>
+    </div>
+    <script id="profileServicesData" type="application/json"><%- JSON.stringify(services || []) %></script>
+</section>

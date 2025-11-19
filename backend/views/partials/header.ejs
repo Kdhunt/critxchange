@@ -14,15 +14,30 @@
                     <a href="/about" class="nav-link <%= typeof title !== 'undefined' && (title === 'About' || title === 'About Page') ? 'active' : '' %>">About</a>
                 </li>
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <li class="nav-item">
-                        <a href="/dashboard" class="nav-link <%= typeof title !== 'undefined' && title === 'Dashboard' ? 'active' : '' %>">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/account" class="nav-link <%= typeof title !== 'undefined' && title === 'Account Administration' ? 'active' : '' %>">Account</a>
-                    </li>
                     <li class="nav-item user-menu">
-                        <span class="user-name"><%= user.username %></span>
-                        <button class="nav-link nav-link-button" id="logoutBtn">Logout</button>
+                        <button class="user-menu-toggle" id="userMenuToggle" aria-haspopup="true" aria-expanded="false">
+                            <span class="user-name"><%= user.username %></span>
+                            <span aria-hidden="true" class="user-menu-caret">▾</span>
+                        </button>
+                        <ul class="user-menu-list" aria-label="Account menu">
+                            <li>
+                                <a href="/dashboard" class="user-menu-link">Dashboard</a>
+                            </li>
+                            <li>
+                                <a href="/account" class="user-menu-link">Account Administration</a>
+                            </li>
+                            <li>
+                                <a href="/profile/manage" class="user-menu-link">Profile Manager</a>
+                            </li>
+                            <% if (user.profile && user.profile.slug) { %>
+                                <li>
+                                    <a href="/profiles/<%= user.profile.slug %>" class="user-menu-link">View Public Profile</a>
+                                </li>
+                            <% } %>
+                            <li>
+                                <button class="user-menu-link link-button" type="button" id="logoutBtn">Logout</button>
+                            </li>
+                        </ul>
                     </li>
                 <% } else { %>
                     <li class="nav-item">

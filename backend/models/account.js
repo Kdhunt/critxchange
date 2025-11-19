@@ -37,5 +37,14 @@ module.exports = (sequelize, DataTypes) => {
         },
     });
 
+    Account.associate = (models) => {
+        Account.hasOne(models.Profile, {
+            foreignKey: 'accountId',
+            as: 'profile',
+            onDelete: 'CASCADE',
+            hooks: true,
+        });
+    };
+
     return Account;
 };

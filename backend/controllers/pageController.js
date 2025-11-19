@@ -1,3 +1,4 @@
+const servicesCatalog = require('../data/services');
 
 /**
  * Page Controller
@@ -46,6 +47,23 @@ class PageController {
             });
         } catch (err) {
             console.error('Error rendering account administration page:', err);
+            res.status(500).send('Internal Server Error');
+        }
+    }
+
+    /**
+     * Render profile manager page
+     */
+    static renderProfileManager(req, res) {
+        try {
+            res.render('profile-manager', {
+                title: 'Profile Manager',
+                description: 'Shape your public author services profile',
+                user: req.user || null,
+                services: servicesCatalog,
+            });
+        } catch (err) {
+            console.error('Error rendering profile manager page:', err);
             res.status(500).send('Internal Server Error');
         }
     }

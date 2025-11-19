@@ -1,0 +1,49 @@
+<section class="public-profile">
+    <div class="container">
+        <% if (notFound || !profile) { %>
+            <div class="profile-empty">
+                <h1>Profile unavailable</h1>
+                <p>The profile you were trying to view is no longer available or has not been published yet.</p>
+            </div>
+        <% } else { %>
+            <div class="public-profile__card">
+                <div class="public-profile__avatar">
+                    <img src="<%= profile.avatarUrl ? profile.avatarUrl : '/images/profile-placeholder.svg' %>" alt="<%= profile.displayName %> profile avatar">
+                </div>
+                <div>
+                    <p class="eyebrow">CritXChange Professional</p>
+                    <h1><%= profile.displayName %></h1>
+                    <p class="lead"><%= profile.bio || 'This member has not added a bio yet.' %></p>
+                    <dl class="profile-meta">
+                        <div>
+                            <dt>Profile URL</dt>
+                            <dd>/profiles/<%= profile.slug %></dd>
+                        </div>
+                        <% if (accountMeta && accountMeta.createdAt) { %>
+                            <div>
+                                <dt>Member since</dt>
+                                <dd><%= new Date(accountMeta.createdAt).toLocaleDateString() %></dd>
+                            </div>
+                        <% } %>
+                    </dl>
+                </div>
+            </div>
+
+            <section class="public-profile__services">
+                <header>
+                    <h2>Services offered</h2>
+                    <p>Everything an author might need to polish, publish, and promote their book.</p>
+                </header>
+                <div class="services-grid">
+                    <% if ((profile.services || []).length === 0) { %>
+                        <p class="helper-text">This member has not listed services yet. Check back soon.</p>
+                    <% } else { %>
+                        <% profile.services.forEach((service) => { %>
+                            <div class="service-chip"><%= service %></div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </section>
+        <% } %>
+    </div>
+</section>

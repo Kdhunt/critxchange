@@ -7,10 +7,12 @@ const passport = require('passport');
 const path = require('path');
 const apiRoutes = require('./routes/api');
 const accountRoutes = require('./routes/account');
+const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const PageController = require('./controllers/pageController');
 const DashboardController = require('./controllers/dashboardController');
+const ProfileController = require('./controllers/profileController');
 const requireAuth = require('./middleware/viewAuth');
 const optionalAuth = require('./middleware/optionalAuth');
 const cookieParser = require('cookie-parser');
@@ -94,6 +96,7 @@ app.use('/api/auth', authRateLimiter, authRoutes); // Auth API endpoints with ra
 app.use('/api/dashboard', dashboardRoutes); // Dashboard routes
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/profiles', profileRoutes);
 
 // Handle GET requests to API endpoints (redirect to appropriate pages)
 // Note: POST requests to these endpoints work normally for form submissions
@@ -118,6 +121,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', optionalAuth, PageController.renderHome);
 app.get('/about', optionalAuth, PageController.renderAbout);
 app.get('/account', requireAuth, PageController.renderAccountAdministration);
+app.get('/profile/manage', requireAuth, PageController.renderProfileManager);
+app.get('/profiles/:slug', optionalAuth, ProfileController.renderPublicProfile);
 
 // Dashboard route (protected)
 app.get('/dashboard', requireAuth, DashboardController.renderDashboard);

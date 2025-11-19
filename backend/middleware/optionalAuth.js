@@ -1,5 +1,11 @@
 const jwt = require('jsonwebtoken');
-const { Account } = require('../models');
+const { Account, Profile } = require('../models');
+
+const extractToken = (container) => {
+    if (!container || typeof container !== 'object') return null;
+    const { token: containerToken } = container;
+    return containerToken;
+};
 
 /**
  * Optional authentication middleware
@@ -11,17 +17,9 @@ const optionalAuth = async (req, res, next) => {
         let token = null;
 
         // Check for token in cookie
-        if (req.cookies?.token) {
-            ({ token } = req.cookies);
-        }
-        // Check for token in session
-        else if (req.session?.token) {
-            ({ token } = req.session);
-        }
-        // Check for token in query
-        else if (req.query?.token) {
-            ({ token } = req.query);
-        }
+        token = extractToken(req.cookies)
+            || extractToken(req.session)
+            || extractToken(req.query);
 
         if (token) {
             try {
@@ -31,6 +29,7 @@ const optionalAuth = async (req, res, next) => {
                 // Fetch user from database
                 const account = await Account.findByPk(decoded.id, {
                     attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] },
+                    include: [{ model: Profile, as: 'profile' }],
                 });
 
                 if (account) {

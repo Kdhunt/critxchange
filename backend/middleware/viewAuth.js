@@ -1,5 +1,11 @@
 const jwt = require('jsonwebtoken');
-const { Account } = require('../models');
+const { Account, Profile } = require('../models');
+
+const extractToken = (container) => {
+    if (!container || typeof container !== 'object') return null;
+    const { token: containerToken } = container;
+    return containerToken;
+};
 
 /**
  * Middleware to protect views (EJS pages)
@@ -11,8 +17,9 @@ const requireAuth = async (req, res, next) => {
         let token = null;
 
         // Check for token in query (for OAuth redirects) - check first
-        if (req.query.token) {
-            token = req.query.token;
+        const queryToken = extractToken(req.query);
+        if (queryToken) {
+            token = queryToken;
             // Store in cookie and session for future requests
             res.cookie('token', token, {
                 httpOnly: false, // Allow client-side access
@@ -24,16 +31,12 @@ const requireAuth = async (req, res, next) => {
                 req.session.token = token;
             }
         }
-        // Check for token in cookie
-        else if (req.cookies?.token) {
-            ({ token } = req.cookies);
+
+        if (!token) {
+            token = extractToken(req.cookies) || extractToken(req.session);
         }
-        // Check for token in session
-        else if (req.session?.token) {
-            ({ token } = req.session);
-        }
-        // Check for token in Authorization header
-        else if (req.headers.authorization) {
+
+        if (!token && req.headers.authorization) {
             const authHeader = req.headers.authorization;
             token = authHeader.startsWith('Bearer ')
                 ? authHeader.slice(7)
@@ -50,6 +53,7 @@ const requireAuth = async (req, res, next) => {
         // Fetch user from database
         const account = await Account.findByPk(decoded.id, {
             attributes: { exclude: ['password', 'mfaSecret', 'passwordResetToken'] },
+            include: [{ model: Profile, as: 'profile' }],
         });
 
         if (!account) {

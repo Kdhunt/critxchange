@@ -1,5 +1,5 @@
 const passport = require('passport');
-const { Account } = require('../models');
+const { Account, Profile } = require('../models');
 
 // Only configure Google OAuth if credentials are provided
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
@@ -65,7 +65,9 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const user = await Account.findByPk(id);
+        const user = await Account.findByPk(id, {
+            include: [{ model: Profile, as: 'profile' }],
+        });
         done(null, user);
     } catch (error) {
         done(error, null);
