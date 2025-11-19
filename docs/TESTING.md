@@ -51,46 +51,46 @@ Located in `scripts/`:
 
 ```bash
 # Run all Jest tests
-npm test
+pnpm test
 
 # Run with coverage
-npm run test:coverage
+pnpm run test:coverage
 
 # Run in watch mode (development)
-npm run test:watch
+pnpm run test:watch
 
 # Run all tests (Jest + standalone)
-npm run test:all
+pnpm run test:all
 ```
 
 ### CI/CD Tests
 
 ```bash
 # Run tests in CI mode (with coverage, optimized for CI)
-npm run test:ci
+pnpm run test:ci
 ```
 
 ### Individual Test Suites
 
 ```bash
 # Authentication tests only
-npm test -- auth.test.js
+pnpm test -- auth.test.js
 
 # Validation tests only
-npm test -- validation.test.js
+pnpm test -- validation.test.js
 
 # Account tests only
-npm test -- account.test.js
+pnpm test -- account.test.js
 ```
 
 ### Standalone Scripts
 
 ```bash
 # Authentication flow tests
-npm run test:auth
+pnpm run test:auth
 
 # MFA flow tests
-npm run test:mfa
+pnpm run test:mfa
 ```
 
 ## Build Process Integration
@@ -100,7 +100,7 @@ npm run test:mfa
 The build process automatically runs all tests:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 This command:
@@ -114,7 +114,7 @@ This command:
 The `precommit` script runs tests before commits:
 
 ```bash
-npm run precommit
+pnpm run precommit
 ```
 
 This ensures code quality before committing.
@@ -276,12 +276,12 @@ Tests automatically run:
 
 1. Check environment variables are set
 2. Ensure database is clean
-3. Run `npm install` to update dependencies
+3. Run `pnpm install` to update dependencies
 4. Check for port conflicts
 
 ### Coverage Issues
 
-1. Run `npm run test:coverage` to see detailed coverage
+1. Run `pnpm run test:coverage` to see detailed coverage
 2. Check uncovered lines in report
 3. Add tests for uncovered code paths
 
