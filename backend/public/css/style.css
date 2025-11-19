@@ -765,3 +765,211 @@ body {
 #logoutBtn:hover {
     background-color: var(--bg-secondary);
 }
+
+/* ============================================
+   Account Administration
+   ============================================ */
+.account-admin {
+    padding: var(--spacing-xl) 0 var(--spacing-xxl, 4rem);
+    background: var(--bg-secondary);
+}
+
+.account-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.account-header h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    margin-bottom: var(--spacing-xs);
+}
+
+.account-header .lead {
+    color: var(--text-secondary);
+    max-width: 640px;
+}
+
+.account-meta {
+    display: flex;
+    gap: var(--spacing-lg);
+    background: var(--bg-primary);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    min-width: 280px;
+}
+
+.account-meta .label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.account-panel {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.account-panel.danger {
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    background: linear-gradient(180deg, rgba(220, 53, 69, 0.04), transparent);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.panel-header .panel-helper,
+.panel-copy {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.account-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.account-summary div {
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.account-summary dt {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.account-summary dd {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+.form-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+}
+
+.form-status {
+    font-size: 0.9rem;
+    min-height: 1.25rem;
+}
+
+.form-status.error {
+    color: var(--danger-color);
+}
+
+.form-status.success {
+    color: var(--success-color);
+}
+
+.helper-list {
+    padding-left: 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.btn-primary,
+.btn-danger {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.9rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--text-light);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: var(--text-light);
+}
+
+.btn-danger:hover {
+    background: #b02a37;
+}
+
+@media (max-width: 768px) {
+    .account-header {
+        flex-direction: column;
+    }
+
+    .account-meta {
+        width: 100%;
+    }
+}

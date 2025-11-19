@@ -17,7 +17,7 @@ This guide provides a comprehensive checklist for deploying CritXChange to produ
 
 - [ ] Set up PostgreSQL database
 - [ ] Configure database connection string
-- [ ] Run migrations: `npm run migrate`
+- [ ] Run migrations: `pnpm run migrate`
 - [ ] Verify all tables created correctly
 - [ ] Set up database backups
 - [ ] Configure connection pooling
@@ -81,8 +81,8 @@ git status
 # Create production branch (optional)
 git checkout -b production
 
-# Remove development dependencies
-npm ci --production
+# Install only production dependencies from the lockfile
+pnpm install --prod --frozen-lockfile
 ```
 
 ### Step 2: Database Migration
@@ -92,7 +92,7 @@ npm ci --production
 export NODE_ENV=production
 
 # Run migrations
-npm run migrate
+pnpm run migrate
 
 # Verify migration success
 # Check database tables
@@ -132,17 +132,17 @@ CORS_ORIGIN=https://yourdomain.com
 
 ```bash
 # Install dependencies
-npm ci --production
+pnpm install --prod --frozen-lockfile
 
 # Start application
-npm start
+pnpm start
 ```
 
 ### Step 5: Process Manager Setup (PM2 Example)
 
 ```bash
 # Install PM2 globally
-npm install -g pm2
+pnpm add -g pm2
 
 # Create ecosystem file
 cat > ecosystem.config.js << EOF
@@ -230,7 +230,7 @@ app.use(cors(corsOptions));
 ### 2. Add Rate Limiting
 
 ```bash
-npm install express-rate-limit
+pnpm add express-rate-limit
 ```
 
 ```javascript
@@ -248,7 +248,7 @@ app.use('/api/', limiter);
 ### 3. Configure Session Store
 
 ```bash
-npm install connect-redis redis
+pnpm add connect-redis redis
 ```
 
 ```javascript
@@ -293,7 +293,7 @@ router.get('/health', (req, res) => {
 ### 2. Error Tracking (Sentry Example)
 
 ```bash
-npm install @sentry/node
+pnpm add @sentry/node
 ```
 
 ```javascript

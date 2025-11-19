@@ -47,7 +47,7 @@ SMTP_PASS=your_16_character_app_password
 Restart your server and test password reset:
 
 ```bash
-npm start
+pnpm start
 ```
 
 Then visit `http://localhost:3000/auth/forgot-password` and request a reset.
