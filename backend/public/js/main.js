@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const nav = document.querySelector('.main-nav');
     const logoutBtn = document.getElementById('logoutBtn');
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    const userMenu = document.querySelector('.user-menu');
 
     // Mobile menu toggle
     if (mobileMenuToggle && nav) {
@@ -46,5 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logout functionality
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
+    }
+
+    if (userMenuToggle && userMenu) {
+        userMenuToggle.addEventListener('click', () => {
+            const isOpen = userMenu.classList.toggle('open');
+            userMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!userMenu.contains(event.target)) {
+                userMenu.classList.remove('open');
+                userMenuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 });

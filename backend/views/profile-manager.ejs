@@ -1,0 +1,8 @@
+<%- include('layouts/main', {
+    title: 'Profile Manager',
+    description: 'Publish the services you offer to other CritXChange members',
+    bodyComponent: 'profile-manager-body',
+    user: typeof user !== 'undefined' ? user : null,
+    services: typeof services !== 'undefined' ? services : [],
+    additionalScripts: '<script src="/js/profile-manager.js" defer></script>'
+}) %>

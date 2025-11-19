@@ -1,0 +1,9 @@
+<%- include('layouts/main', {
+    title: typeof title !== 'undefined' ? title : 'Profile',
+    description: typeof description !== 'undefined' ? description : 'Discover CritXChange professionals and the services they offer',
+    bodyComponent: 'profile-public-body',
+    user: typeof user !== 'undefined' ? user : null,
+    profile: typeof profile !== 'undefined' ? profile : null,
+    accountMeta: typeof accountMeta !== 'undefined' ? accountMeta : null,
+    notFound: typeof notFound !== 'undefined' ? notFound : false
+}) %>

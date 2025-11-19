@@ -1,4 +1,4 @@
-const { Account } = require('../models');
+const { Account, Profile } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
@@ -13,7 +13,8 @@ class AccountController {
     static excludePassword(account) {
         if (!account) return null;
         const accountObj = account.toJSON ? account.toJSON() : account;
-        const { password: _password, ...accountWithoutPassword } = accountObj;
+        const accountWithoutPassword = { ...accountObj };
+        delete accountWithoutPassword.password;
         return accountWithoutPassword;
     }
 
@@ -24,6 +25,7 @@ class AccountController {
         try {
             const accounts = await Account.findAll({
                 attributes: { exclude: ['password'] },
+                include: [{ model: Profile, as: 'profile' }],
             });
             res.json(accounts);
         } catch (error) {
@@ -39,6 +41,7 @@ class AccountController {
         try {
             const account = await Account.findByPk(req.user.id, {
                 attributes: { exclude: ['password'] },
+                include: [{ model: Profile, as: 'profile' }],
             });
             if (account) {
                 res.json(account);
@@ -58,6 +61,7 @@ class AccountController {
         try {
             const account = await Account.findByPk(req.params.id, {
                 attributes: { exclude: ['password'] },
+                include: [{ model: Profile, as: 'profile' }],
             });
             if (account) {
                 res.json(account);
