@@ -283,7 +283,7 @@ const renderReplies = (metadata = {}) => {
             ${replies.map((reply) => `
                 <div class="reply">
                     <small>${reply.sender || 'You'} · ${formatDateTime(reply.createdAt)}</small>
-                    <p>${reply.body}</p>
+                    <p>${escapeHtml(reply.body)}</p>
                 </div>
             `).join('')}
         </div>
@@ -307,6 +307,15 @@ const renderAttachments = (metadata = {}) => {
             </ul>
         </div>
     `;
+};
+
+const escapeHtml = (value = '') => {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 };
 
 const renderNotificationDetail = (notification) => {
@@ -337,7 +346,7 @@ const renderNotificationDetail = (notification) => {
         </div>
         <h3>${notification.title}</h3>
         <div class="message-body">
-            <p>${notification.body}</p>
+            <p>${escapeHtml(notification.body)}</p>
         </div>
         ${renderAttachments(notification.metadata)}
         <div class="message-actions">

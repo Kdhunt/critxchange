@@ -7,7 +7,7 @@ const MessageController = require('../controllers/messageController');
 
 const router = express.Router();
 
-const uploadDirectory = path.join(__dirname, '..', 'public', 'uploads', 'messages');
+const uploadDirectory = path.join(__dirname, '..', 'data', 'uploads', 'messages');
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory, { recursive: true });
 }
@@ -61,5 +61,9 @@ router.post('/', authenticateJWT, (req, res, next) => {
         return MessageController.sendToProfile(req, res, next);
     });
 });
+
+router.get('/:notificationId/attachments/:fileName', authenticateJWT, (req, res) =>
+    MessageController.downloadAttachment(req, res, uploadDirectory),
+);
 
 module.exports = router;
