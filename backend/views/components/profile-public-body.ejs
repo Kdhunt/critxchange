@@ -26,6 +26,13 @@
                             </div>
                         <% } %>
                     </dl>
+                    <% if (user) { %>
+                        <div class="profile-actions">
+                            <button class="btn-primary" type="button" id="contactProfileBtn" data-profile-slug="<%= profile.slug %>">
+                                Send a message
+                            </button>
+                        </div>
+                    <% } %>
                 </div>
             </div>
 
@@ -46,4 +53,39 @@
             </section>
         <% } %>
     </div>
+
+    <% if (user) { %>
+        <div class="modal" id="messageModal" aria-hidden="true" role="dialog" aria-labelledby="messageModalTitle">
+            <div class="modal__overlay" id="messageModalOverlay"></div>
+            <div class="modal__content" role="document">
+                <div class="modal__header">
+                    <h2 id="messageModalTitle">Message <%= profile.displayName %></h2>
+                    <button class="modal__close" type="button" id="closeMessageModal" aria-label="Close message composer">×</button>
+                </div>
+                <form id="profileMessageForm" data-profile-slug="<%= profile.slug %>" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="messageSubject">Subject</label>
+                        <input type="text" id="messageSubject" name="subject" required maxlength="150" placeholder="Project inquiry or collaboration idea">
+                    </div>
+                    <div class="form-group">
+                        <label for="messageBody">Message</label>
+                        <textarea id="messageBody" name="body" rows="6" required placeholder="Share details about what you need and your timeline"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageAttachments">Attachments (optional)</label>
+                        <input type="file" id="messageAttachments" name="attachments" multiple aria-describedby="attachmentHint">
+                        <p class="helper-text" id="attachmentHint">You can attach documents or images. Maximum total size: 5 MB.</p>
+                        <p class="form-status" id="attachmentStatus" role="status" aria-live="polite"></p>
+                    </div>
+                    <div class="form-footer">
+                        <p class="form-status" id="messageStatus" role="status" aria-live="polite"></p>
+                        <div class="modal__actions">
+                            <button type="button" class="btn-ghost" id="cancelMessageModal">Cancel</button>
+                            <button type="submit" class="btn-primary">Send message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <% } %>
 </section>

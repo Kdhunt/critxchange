@@ -1087,6 +1087,47 @@ body {
     border: 1px solid var(--border-color);
 }
 
+.message-attachments {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message-attachments ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.message-attachments li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.message-attachments a {
+    color: var(--primary-color);
+    text-decoration: none;
+    word-break: break-word;
+}
+
+.message-attachments a:hover {
+    text-decoration: underline;
+}
+
+.attachment-size {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
 .message-actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -1380,6 +1421,73 @@ body {
     border: 1px dashed rgba(255, 255, 255, 0.2);
     padding: 1.5rem;
     border-radius: 1rem;
+}
+
+.profile-actions {
+    margin-top: 1.5rem;
+}
+
+.profile-actions .btn-primary {
+    padding: 0.85rem 1.4rem;
+    font-weight: 700;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+
+.modal__content {
+    position: relative;
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    width: min(720px, 95%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    z-index: 1;
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.modal__close {
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.no-scroll {
+    overflow: hidden;
 }
 
 .service-chip {

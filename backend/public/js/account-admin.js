@@ -290,6 +290,25 @@ const renderReplies = (metadata = {}) => {
     `;
 };
 
+const renderAttachments = (metadata = {}) => {
+    const attachments = Array.isArray(metadata.attachments) ? metadata.attachments : [];
+    if (!attachments.length) return '';
+
+    return `
+        <div class="message-attachments">
+            <p class="eyebrow">Attachments</p>
+            <ul>
+                ${attachments.map((file) => `
+                    <li>
+                        <a href="${file.url}" target="_blank" rel="noopener noreferrer">${file.originalName || file.fileName}</a>
+                        <span class="attachment-size">${file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+    `;
+};
+
 const renderNotificationDetail = (notification) => {
     const detail = document.getElementById('notificationDetail');
     if (!detail) return;
@@ -320,6 +339,7 @@ const renderNotificationDetail = (notification) => {
         <div class="message-body">
             <p>${notification.body}</p>
         </div>
+        ${renderAttachments(notification.metadata)}
         <div class="message-actions">
             <button type="button" class="btn-primary" id="markReadToggle">
                 ${notification.isRead ? 'Mark as unread' : 'Mark as read'}
