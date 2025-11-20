@@ -10,6 +10,7 @@ const accountRoutes = require('./routes/account');
 const profileRoutes = require('./routes/profile');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
+const notificationRoutes = require('./routes/notifications');
 const PageController = require('./controllers/pageController');
 const DashboardController = require('./controllers/dashboardController');
 const ProfileController = require('./controllers/profileController');
@@ -97,6 +98,7 @@ app.use('/api/dashboard', dashboardRoutes); // Dashboard routes
 app.use('/api', apiRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Handle GET requests to API endpoints (redirect to appropriate pages)
 // Note: POST requests to these endpoints work normally for form submissions
