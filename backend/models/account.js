@@ -44,6 +44,12 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'CASCADE',
             hooks: true,
         });
+
+        Account.hasMany(models.Notification, {
+            foreignKey: 'accountId',
+            as: 'notifications',
+            onDelete: 'CASCADE',
+        });
     };
 
     return Account;

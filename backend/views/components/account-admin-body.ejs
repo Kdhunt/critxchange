@@ -130,6 +130,34 @@
                     </div>
                 </form>
             </section>
+
+            <section class="account-panel message-center" aria-labelledby="messageCenterHeading" id="messageCenter">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Inbox</p>
+                        <h2 id="messageCenterHeading">Message center</h2>
+                    </div>
+                    <div class="message-center-meta">
+                        <span class="chip" id="unreadBadge">0 unread</span>
+                        <button class="btn-ghost" type="button" id="refreshNotifications">Refresh</button>
+                    </div>
+                </div>
+
+                <p class="panel-copy">System, admin, and external notifications are consolidated here. Review message details, reply in-line, or archive threads you no longer need.</p>
+
+                <div class="message-center-grid">
+                    <div class="message-list" id="notificationList" role="list" aria-label="Notifications">
+                        <div class="message-list-empty" id="notificationEmptyState">Loading your notifications…</div>
+                    </div>
+
+                    <div class="message-detail" id="notificationDetail" aria-live="polite">
+                        <div class="message-detail-empty">
+                            <p class="eyebrow">Select a message</p>
+                            <p class="panel-copy">Choose a notification from the left to see details, send a reply, and mark it as handled.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </section>

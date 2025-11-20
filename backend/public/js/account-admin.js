@@ -200,9 +200,275 @@ const hydrateAccountData = async () => {
     }
 };
 
+const notificationState = {
+    items: [],
+    activeId: null,
+};
+
+const previewFromBody = (body) => {
+    if (!body) return '';
+    const condensed = body.replace(/\s+/g, ' ').trim();
+    return condensed.length > 140 ? `${condensed.slice(0, 140)}…` : condensed;
+};
+
+const setUnreadBadge = (count = 0) => {
+    const badge = document.getElementById('unreadBadge');
+    if (!badge) return;
+    const safeCount = Number(count) || 0;
+    badge.textContent = `${safeCount} unread`;
+};
+
+const formatDateTime = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+};
+
+const renderNotificationList = () => {
+    const list = document.getElementById('notificationList');
+    const empty = document.getElementById('notificationEmptyState');
+    if (!list || !empty) return;
+
+    list.innerHTML = '';
+
+    if (!notificationState.items.length) {
+        empty.textContent = 'No notifications yet. New messages from admins, systems, and integrations will appear here.';
+        list.appendChild(empty);
+        return;
+    }
+
+    notificationState.items.forEach((notification) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.classList.add('notification-item');
+        if (notification.id === notificationState.activeId) {
+            button.classList.add('is-active');
+        }
+
+        const badgeClass = notification.category === 'admin'
+            ? 'badge admin'
+            : notification.category === 'external'
+                ? 'badge external'
+                : 'badge';
+
+        button.innerHTML = `
+            <div class="title-row">
+                <h3>${notification.title || 'Untitled'} <span class="${badgeClass}">${notification.category}</span></h3>
+                ${notification.isRead ? '' : '<span class="unread-dot" aria-label="Unread"></span>'}
+            </div>
+            <p class="preview">${notification.preview || previewFromBody(notification.body)}</p>
+            <div class="meta-row">
+                <span>${notification.sender || 'Unknown sender'}</span>
+                <span aria-hidden="true">•</span>
+                <span>${formatDateTime(notification.createdAt)}</span>
+            </div>
+        `;
+
+        button.addEventListener('click', () => {
+            notificationState.activeId = notification.id;
+            renderNotificationList();
+            renderNotificationDetail(notification);
+        });
+
+        list.appendChild(button);
+    });
+};
+
+const renderReplies = (metadata = {}) => {
+    const replies = Array.isArray(metadata.replies) ? metadata.replies : [];
+    if (!replies.length) return '';
+
+    return `
+        <div class="message-replies">
+            ${replies.map((reply) => `
+                <div class="reply">
+                    <small>${reply.sender || 'You'} · ${formatDateTime(reply.createdAt)}</small>
+                    <p>${reply.body}</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+};
+
+const renderNotificationDetail = (notification) => {
+    const detail = document.getElementById('notificationDetail');
+    if (!detail) return;
+
+    if (!notification) {
+        detail.innerHTML = `
+            <div class="message-detail-empty">
+                <p class="eyebrow">No messages</p>
+                <p class="panel-copy">Your message center will display new notifications from admins, system monitors, and external integrations.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const badgeClass = notification.category === 'admin'
+        ? 'badge admin'
+        : notification.category === 'external'
+            ? 'badge external'
+            : 'badge';
+
+    detail.innerHTML = `
+        <div class="detail-meta">
+            <span class="${badgeClass}">${notification.category}</span>
+            <span>From ${notification.sender || 'Unknown sender'}</span>
+            <span>${formatDateTime(notification.createdAt)}</span>
+        </div>
+        <h3>${notification.title}</h3>
+        <div class="message-body">
+            <p>${notification.body}</p>
+        </div>
+        <div class="message-actions">
+            <button type="button" class="btn-primary" id="markReadToggle">
+                ${notification.isRead ? 'Mark as unread' : 'Mark as read'}
+            </button>
+            <button type="button" class="btn-danger" id="deleteNotification">Delete</button>
+        </div>
+        <div class="message-reply-block">
+            <form class="reply-form" id="replyForm">
+                <label for="replyMessage">Reply to ${notification.sender || 'this message'}</label>
+                <textarea id="replyMessage" name="replyMessage" placeholder="Write your response" required></textarea>
+                <div class="form-footer">
+                    <p class="form-status" id="replyStatus" role="status" aria-live="polite"></p>
+                    <button type="submit" class="btn-ghost">Send reply</button>
+                </div>
+            </form>
+        </div>
+        ${renderReplies(notification.metadata)}
+    `;
+
+    const markButton = document.getElementById('markReadToggle');
+    const deleteButton = document.getElementById('deleteNotification');
+    const replyForm = document.getElementById('replyForm');
+    const replyStatus = document.getElementById('replyStatus');
+    const replyMessage = document.getElementById('replyMessage');
+
+    if (markButton) {
+        markButton.addEventListener('click', async () => {
+            try {
+                const payload = await authorizedFetch(`/api/notifications/${notification.id}/read`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ isRead: !notification.isRead }),
+                });
+
+                const updated = {
+                    ...notification,
+                    ...payload.notification,
+                    preview: notification.preview || previewFromBody(payload.notification.body),
+                };
+
+                notificationState.items = notificationState.items.map((item) => (
+                    item.id === updated.id ? updated : item
+                ));
+
+                const unread = notificationState.items.filter((item) => !item.isRead).length;
+                setUnreadBadge(unread);
+                renderNotificationList();
+                renderNotificationDetail(updated);
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener('click', async () => {
+            const confirmed = window.confirm('Delete this notification? This action cannot be undone.');
+            if (!confirmed) return;
+
+            try {
+                await authorizedFetch(`/api/notifications/${notification.id}`, { method: 'DELETE' });
+                notificationState.items = notificationState.items.filter((item) => item.id !== notification.id);
+                notificationState.activeId = notificationState.items[0]?.id || null;
+                const unread = notificationState.items.filter((item) => !item.isRead).length;
+                setUnreadBadge(unread);
+                renderNotificationList();
+                renderNotificationDetail(notificationState.items.find((item) => item.id === notificationState.activeId));
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    }
+
+    if (replyForm && replyStatus && replyMessage) {
+        replyForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+                const message = replyMessage.value.trim();
+                if (!message) {
+                    setStatusMessage(replyStatus, 'Please enter a reply message.', true);
+                    return;
+                }
+
+                const payload = await authorizedFetch(`/api/notifications/${notification.id}/reply`, {
+                    method: 'POST',
+                    body: JSON.stringify({ body: message }),
+                });
+
+                const updated = {
+                    ...notification,
+                    ...payload.notification,
+                    preview: notification.preview || previewFromBody(payload.notification.body),
+                };
+
+                notificationState.items = notificationState.items.map((item) => (
+                    item.id === updated.id ? updated : item
+                ));
+
+                setStatusMessage(replyStatus, 'Reply sent.', false);
+                replyMessage.value = '';
+                renderNotificationDetail(updated);
+            } catch (error) {
+                console.error('Reply failed:', error);
+                setStatusMessage(replyStatus, error.message, true);
+            }
+        });
+    }
+};
+
+const loadNotifications = async () => {
+    const empty = document.getElementById('notificationEmptyState');
+    if (empty) {
+        empty.textContent = 'Loading your notifications…';
+    }
+
+    try {
+        const payload = await authorizedFetch('/api/notifications');
+        notificationState.items = payload.notifications || [];
+
+        if (!notificationState.activeId && notificationState.items.length) {
+            notificationState.activeId = notificationState.items[0].id;
+        }
+
+        if (notificationState.activeId && !notificationState.items.find((item) => item.id === notificationState.activeId)) {
+            notificationState.activeId = notificationState.items[0]?.id || null;
+        }
+
+        setUnreadBadge(payload.unreadCount || 0);
+        renderNotificationList();
+        renderNotificationDetail(notificationState.items.find((item) => item.id === notificationState.activeId));
+    } catch (error) {
+        console.error('Unable to load notifications:', error);
+        if (empty) {
+            empty.textContent = error.message;
+        }
+    }
+};
+
+const registerMessageCenterHandlers = () => {
+    const refreshButton = document.getElementById('refreshNotifications');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', loadNotifications);
+    }
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     attachProfileFormHandler();
     attachPasswordFormHandler();
     attachDeleteHandler();
     hydrateAccountData();
+    registerMessageCenterHandlers();
+    loadNotifications();
 });
