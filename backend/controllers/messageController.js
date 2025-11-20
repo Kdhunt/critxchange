@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { Notification, Profile } = require('../models');
 
 const MAX_TOTAL_BYTES = 5 * 1024 * 1024;
@@ -55,7 +56,6 @@ class MessageController {
                 fileName: file.filename,
                 size: file.size,
                 mimeType: file.mimetype,
-                url: `/uploads/messages/${file.filename}`,
             }));
 
             const notification = await Notification.create({
@@ -73,6 +73,18 @@ class MessageController {
                 },
             });
 
+            if (attachmentMetadata.length) {
+                notification.metadata = {
+                    ...(notification.metadata || {}),
+                    attachments: attachmentMetadata.map((file) => ({
+                        ...file,
+                        url: `/api/messages/${notification.id}/attachments/${encodeURIComponent(file.fileName)}`,
+                    })),
+                };
+
+                await notification.save();
+            }
+
             return res.status(201).json({
                 notification,
                 message: 'Your message has been sent to the profile owner.',
@@ -81,6 +93,42 @@ class MessageController {
             console.error('Error sending profile message:', error);
             cleanupFiles(req.files);
             return res.status(500).json({ error: 'Unable to send your message right now' });
+        }
+    }
+
+    static async downloadAttachment(req, res, uploadDirectory) {
+        try {
+            const accountId = req.user.id;
+            const { notificationId, fileName } = req.params;
+            const safeFileName = path.basename(fileName);
+
+            const notification = await Notification.findOne({ where: { id: notificationId } });
+            if (!notification) {
+                return res.status(404).json({ error: 'Attachment not found' });
+            }
+
+            const metadata = notification.metadata || {};
+            const attachments = Array.isArray(metadata.attachments) ? metadata.attachments : [];
+            const attachment = attachments.find((file) => file.fileName === safeFileName);
+
+            if (!attachment) {
+                return res.status(404).json({ error: 'Attachment not found' });
+            }
+
+            const permittedAccountIds = [notification.accountId, metadata.fromAccountId].filter(Boolean);
+            if (!permittedAccountIds.includes(accountId)) {
+                return res.status(403).json({ error: 'You are not authorized to access this attachment' });
+            }
+
+            const filePath = path.join(uploadDirectory, safeFileName);
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ error: 'Attachment not found' });
+            }
+
+            return res.sendFile(filePath);
+        } catch (error) {
+            console.error('Error downloading attachment:', error);
+            return res.status(500).json({ error: 'Unable to retrieve the attachment' });
         }
     }
 }
