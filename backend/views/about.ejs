@@ -1,1 +1,31 @@
-<%- include('layouts/main', { title: 'About Page', body: `<h2>About Us</h2><p>This is the about page content.</p>` }) %>
+<%- include('layouts/main', { 
+    title: 'About', 
+    description: 'Learn more about CritXChange',
+    body: `
+        <section class="hero-section" style="min-height: 300px;">
+            <div class="container">
+                <div style="text-align: center; padding: 3rem 0;">
+                    <h1 class="hero-title">About CritXChange</h1>
+                    <p class="hero-subtitle">Learn more about our platform and mission</p>
+                </div>
+            </div>
+        </section>
+        <section class="features-section">
+            <div class="container">
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <h2 class="section-title">Our Mission</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary); text-align: center; margin-bottom: 2rem;">
+                        CritXChange is dedicated to providing a secure, fast, and collaborative platform 
+                        for critical exchanges and connections. We believe in empowering teams and individuals 
+                        with the tools they need to succeed.
+                    </p>
+                    <h2 class="section-title">What We Offer</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary); text-align: center;">
+                        Our platform combines enterprise-grade security with intuitive design, making it easy 
+                        for users to connect, collaborate, and exchange critical information safely and efficiently.
+                    </p>
+                </div>
+            </div>
+        </section>
+    `
+}) %>

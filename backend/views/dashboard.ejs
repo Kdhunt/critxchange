@@ -1,0 +1,7 @@
+<%- include('layouts/main', { 
+    title: 'Dashboard', 
+    description: 'Your CritXChange dashboard',
+    bodyComponent: 'dashboard-body',
+    user: typeof user !== 'undefined' ? user : null
+}) %>
+

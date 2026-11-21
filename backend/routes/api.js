@@ -3,22 +3,21 @@ const authenticateJWT = require('../middleware/auth');
 
 const router = express.Router();
 
-// Example CRUD routes
+// Example placeholder CRUD routes
 router.get('/items', authenticateJWT, (req, res) => {
-  // Get all items
+    res.json({ message: 'Listing items is not implemented yet.' });
 });
 
 router.post('/items', authenticateJWT, (req, res) => {
-  // Create a new item
+    res.status(501).json({ error: 'Creating items is not implemented yet.' });
 });
 
 router.put('/items/:id', authenticateJWT, (req, res) => {
-  // Update an item
+    res.status(501).json({ error: 'Updating items is not implemented yet.' });
 });
 
 router.delete('/items/:id', authenticateJWT, (req, res) => {
-  // Delete an item
+    res.status(501).json({ error: 'Deleting items is not implemented yet.' });
 });
 
 module.exports = router;
-

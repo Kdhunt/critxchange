@@ -1,9 +1,58 @@
-<header>
-    <h1>My Website</h1>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-        </ul>
-    </nav>
+<header class="site-header">
+    <div class="header-container">
+        <div class="logo">
+            <a href="/" class="logo-link">
+                <span class="logo-text">CritXChange</span>
+            </a>
+        </div>
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link <%= typeof title !== 'undefined' && (title === 'Home' || title === 'Home Page') ? 'active' : '' %>">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about" class="nav-link <%= typeof title !== 'undefined' && (title === 'About' || title === 'About Page') ? 'active' : '' %>">About</a>
+                </li>
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <li class="nav-item user-menu">
+                        <button class="user-menu-toggle" id="userMenuToggle" aria-haspopup="true" aria-expanded="false">
+                            <span class="user-name"><%= user.username %></span>
+                            <span aria-hidden="true" class="user-menu-caret">▾</span>
+                        </button>
+                        <ul class="user-menu-list" aria-label="Account menu">
+                            <li>
+                                <a href="/dashboard" class="user-menu-link">Dashboard</a>
+                            </li>
+                            <li>
+                                <a href="/account" class="user-menu-link">Account Administration</a>
+                            </li>
+                            <li>
+                                <a href="/profile/manage" class="user-menu-link">Profile Manager</a>
+                            </li>
+                            <% if (user.profile && user.profile.slug) { %>
+                                <li>
+                                    <a href="/profiles/<%= user.profile.slug %>" class="user-menu-link">View Public Profile</a>
+                                </li>
+                            <% } %>
+                            <li>
+                                <button class="user-menu-link link-button" type="button" id="logoutBtn">Logout</button>
+                            </li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a href="/auth/login" class="nav-link nav-link-button">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/auth/register" class="nav-link nav-link-button-primary">Sign Up</a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+        <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
 </header>
